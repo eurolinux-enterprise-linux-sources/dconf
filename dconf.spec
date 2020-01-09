@@ -1,33 +1,28 @@
 %define glib2_version 2.44.0
-%define vala_version 0.18.0
 
 Name:           dconf
-Version:        0.26.0
-Release:        3%{?dist}.1
+Version:        0.28.0
+Release:        4%{?dist}
 Summary:        A configuration system
 
-Group:          System Environment/Base
 License:        LGPLv2+ and GPLv2+ and GPLv3+
 URL:            http://live.gnome.org/dconf
-#VCS:           git:git://git.gnome.org/dconf
-Source0:        http://download.gnome.org/sources/dconf/0.22/dconf-%{version}.tar.xz
+Source0:        http://download.gnome.org/sources/dconf/0.28/dconf-%{version}.tar.xz
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1386841
-Patch0:         dconf-0.26.0-Remove-libdbus-1-support.patch
-Patch1:         dconf-0.26.0-read-flag.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1567184
+Patch1:         dconf-0.28.0-dbus-1.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1281253
 Patch2:         dconf-0.26.0-permissions.patch
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1626372
-Patch3:         dconf-0.26.0-db-mtime.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1570569
+Patch3:         dconf-0.28.0-db-mtime.patch
 
 BuildRequires:  glib2-devel >= %{glib2_version}
-BuildRequires:  libxml2-devel
 BuildRequires:  dbus-devel
-BuildRequires:  vala-devel >= %{vala_version}
 BuildRequires:  gtk-doc
-BuildRequires:  intltool
+BuildRequires:  meson
+BuildRequires:  vala
 
 Requires:       dbus
 Requires:       glib2%{?_isa} >= %{glib2_version}
@@ -38,7 +33,6 @@ backend to the GSettings API in GLib.
 
 %package devel
 Summary: Header files and libraries for dconf development
-Group: Development/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
@@ -46,23 +40,17 @@ dconf development package. Contains files needed for doing software
 development using dconf.
 
 %prep
-%setup -q
-%patch0 -p1 -R -b .libdbus
-%patch1 -p1 -b .read-flag
-%patch2 -p1 -b .permissions
-%patch3 -p1 -b .mtimes
-
-autoreconf -ivf
+%autosetup -p1
 
 %build
-%configure --disable-static
-make V=1 %{?_smp_mflags}
-
+%meson -Denable-gtk-doc=true
+%meson_build
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+%meson_install
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dconf/profile
+
 cat << EOF > $RPM_BUILD_ROOT%{_sysconfdir}/dconf/profile/user
 user-db:user
 system-db:local
@@ -76,14 +64,11 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dconf/db/distro.d/locks
 
 # dconf-dbus-1 was removed in dconf 0.24,
 # we keep just the library for compatibility
-rm -fv $RPM_BUILD_ROOT%{_libdir}/pkgconfig/dconf-dbus-1.pc
-rm -fv $RPM_BUILD_ROOT%{_includedir}/dconf-dbus-1/*
-rmdir -v $RPM_BUILD_ROOT%{_includedir}/dconf-dbus-1/
+rm -fv $RPM_BUILD_ROOT%{_libdir}/libdconf-dbus-1.so
 
 %post
 /sbin/ldconfig
 gio-querymodules-%{__isa_bits} %{_libdir}/gio/modules
-dconf update
 
 %postun
 /sbin/ldconfig
@@ -94,26 +79,11 @@ fi
 
 %posttrans
 glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
-
+dconf update
 
 %files
 %license COPYING
 %dir %{_sysconfdir}/dconf
-%dir %{_sysconfdir}/dconf/db
-%dir %{_sysconfdir}/dconf/profile
-%{_libdir}/gio/modules/libdconfsettings.so
-%{_libexecdir}/dconf-service
-%{_datadir}/dbus-1/services/ca.desrt.dconf.service
-%{_bindir}/dconf
-%{_libdir}/libdconf.so.*
-%{_libdir}/libdconf-dbus-1.so.*
-%{_datadir}/bash-completion/completions/dconf
-%{_mandir}/man1/dconf-service.1.gz
-%{_mandir}/man1/dconf.1.gz
-%{_mandir}/man7/dconf.7.gz
-%config(noreplace) %{_sysconfdir}/dconf/profile/user
-%dir %{_sysconfdir}/dconf
-%dir %{_sysconfdir}/dconf/profile
 %dir %{_sysconfdir}/dconf/db
 %dir %{_sysconfdir}/dconf/db/local.d
 %dir %{_sysconfdir}/dconf/db/local.d/locks
@@ -121,20 +91,41 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %dir %{_sysconfdir}/dconf/db/site.d/locks
 %dir %{_sysconfdir}/dconf/db/distro.d
 %dir %{_sysconfdir}/dconf/db/distro.d/locks
+%dir %{_sysconfdir}/dconf/profile
+%{_libdir}/gio/modules/libdconfsettings.so
+%{_libexecdir}/dconf-service
+%{_datadir}/dbus-1/services/ca.desrt.dconf.service
+%{_bindir}/dconf
+%{_libdir}/libdconf.so.1*
+%{_libdir}/libdconf-dbus-1.so.0*
+%{_datadir}/bash-completion/completions/dconf
+%{_mandir}/man1/dconf-service.1.gz
+%{_mandir}/man1/dconf.1.gz
+%{_mandir}/man7/dconf.7.gz
+%config(noreplace) %{_sysconfdir}/dconf/profile/user
 
 %files devel
 %{_includedir}/dconf
 %{_libdir}/libdconf.so
 %{_libdir}/pkgconfig/dconf.pc
-%{_libdir}/libdconf-dbus-1.so
+%dir %{_datadir}/gtk-doc
+%dir %{_datadir}/gtk-doc/html
 %{_datadir}/gtk-doc/html/dconf
 %{_datadir}/vala
 
 %changelog
-* Fri Sep 14 2018 Marek Kasik <mkasik@redhat.com> - 0.26.0-3
+* Wed Jul 25 2018 Marek Kasik <mkasik@redhat.com> - 0.28.0-3
 - Check mtimes of files in /etc/dconf/db/*.d/ directories
 - when running "dconf update"
-- Resolves: #1626372
+- Resolves: #1570569
+
+* Wed May 23 2018 Marek Kasik <mkasik@redhat.com> - 0.28.0-2
+- Return dconf-dbus-1 library (without devel files)
+- Related: #1567184
+
+* Tue Mar 13 2018 Kalev Lember <klember@redhat.com> - 0.28.0-1
+- Update to 0.28.0
+- Resolves: #1567184
 
 * Mon Mar  6 2017 Marek Kasik <mkasik@redhat.com> - 0.26.0-2
 - Restore permissions on updated database
