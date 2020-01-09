@@ -1,0 +1,42 @@
+From ba512dc4225a043b94ef13718f1cbe8a806f5b55 Mon Sep 17 00:00:00 2001
+From: Ryan Lortie <desrt@desrt.ca>
+Date: Tue, 25 Jun 2013 14:43:58 -0400
+Subject: [PATCH 2/2] engine: seal changesets on changes
+
+When we do change operations, make sure we seal our DConfChangeset
+before sharing it between threads.
+
+This will ensure it gets sealed in only one thread instead of being
+implicitly sealed in two different threads at the same time when each of
+them calls dconf_changeset_describe().
+
+https://bugzilla.gnome.org/show_bug.cgi?id=703073
+---
+ engine/dconf-engine.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/engine/dconf-engine.c b/engine/dconf-engine.c
+index 446619e..7beff95 100644
+--- a/engine/dconf-engine.c
++++ b/engine/dconf-engine.c
+@@ -1035,6 +1035,8 @@ dconf_engine_change_fast (DConfEngine     *engine,
+   if (!dconf_engine_changeset_changes_only_writable_keys (engine, changeset, error))
+     return FALSE;
+ 
++  dconf_changeset_seal (changeset);
++
+   /* Check for duplicates in the pending queue.
+    *
+    * Note: order doesn't really matter here since "similarity" is an
+@@ -1105,6 +1107,8 @@ dconf_engine_change_sync (DConfEngine     *engine,
+   if (!dconf_engine_changeset_changes_only_writable_keys (engine, changeset, error))
+     return FALSE;
+ 
++  dconf_changeset_seal (changeset);
++
+   /* we know that we have at least one source because we checked writability */
+   reply = dconf_engine_dbus_call_sync_func (engine->sources[0]->bus_type,
+                                             engine->sources[0]->bus_name,
+-- 
+1.8.3.1
+
