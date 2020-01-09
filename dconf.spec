@@ -1,8 +1,8 @@
-%define glib2_version 2.39.1
+%define glib2_version 2.44.0
 %define vala_version 0.18.0
 
 Name:           dconf
-Version:        0.22.0
+Version:        0.26.0
 Release:        2%{?dist}
 Summary:        A configuration system
 
@@ -12,8 +12,14 @@ URL:            http://live.gnome.org/dconf
 #VCS:           git:git://git.gnome.org/dconf
 Source0:        http://download.gnome.org/sources/dconf/0.22/dconf-%{version}.tar.xz
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1386841
+Patch0:         dconf-0.26.0-Remove-libdbus-1-support.patch
+Patch1:         dconf-0.26.0-read-flag.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1281253
+Patch2:         dconf-0.26.0-permissions.patch
+
 BuildRequires:  glib2-devel >= %{glib2_version}
-BuildRequires:  gtk3-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  dbus-devel
 BuildRequires:  vala-devel >= %{vala_version}
@@ -36,17 +42,13 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 dconf development package. Contains files needed for doing software
 development using dconf.
 
-%package editor
-Summary: Configuration editor for dconf
-Group:   Applications/System
-Requires: %{name}%{?_isa} = %{version}-%{release}
-
-%description editor
-dconf-editor allows you to browse and modify dconf databases.
-
-
 %prep
 %setup -q
+%patch0 -p1 -R -b .libdbus
+%patch1 -p1 -b .read-flag
+%patch2 -p1 -b .permissions
+
+autoreconf -ivf
 
 %build
 %configure --disable-static
@@ -68,7 +70,11 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dconf/db/local.d/locks
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dconf/db/site.d/locks
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dconf/db/distro.d/locks
 
-%find_lang dconf
+# dconf-dbus-1 was removed in dconf 0.24,
+# we keep just the library for compatibility
+rm -fv $RPM_BUILD_ROOT%{_libdir}/pkgconfig/dconf-dbus-1.pc
+rm -fv $RPM_BUILD_ROOT%{_includedir}/dconf-dbus-1/*
+rmdir -v $RPM_BUILD_ROOT%{_includedir}/dconf-dbus-1/
 
 %post
 /sbin/ldconfig
@@ -86,31 +92,8 @@ fi
 glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
-%post editor
-for d in hicolor HighContrast ; do
-  touch --no-create %{_datadir}/icons/$d &>/dev/null || :
-done
-
-%postun editor
-if [ $1 -eq 0 ] ; then
-  glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
-
-  for d in hicolor HighContrast ; do
-    touch --no-create %{_datadir}/icons/$d &>/dev/null || :
-    gtk-update-icon-cache %{_datadir}/icons/$d &>/dev/null || :
-  done
-fi
-
-%posttrans editor
-glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
-
-for d in hicolor HighContrast ; do
-  gtk-update-icon-cache %{_datadir}/icons/$d &>/dev/null || :
-done
-
-
-%files -f dconf.lang
-%doc COPYING
+%files
+%license COPYING
 %dir %{_sysconfdir}/dconf
 %dir %{_sysconfdir}/dconf/db
 %dir %{_sysconfdir}/dconf/profile
@@ -139,23 +122,21 @@ done
 %{_includedir}/dconf
 %{_libdir}/libdconf.so
 %{_libdir}/pkgconfig/dconf.pc
-%{_includedir}/dconf-dbus-1
 %{_libdir}/libdconf-dbus-1.so
-%{_libdir}/pkgconfig/dconf-dbus-1.pc
 %{_datadir}/gtk-doc/html/dconf
 %{_datadir}/vala
 
-%files editor
-%{_bindir}/dconf-editor
-%{_datadir}/appdata/ca.desrt.dconf-editor.appdata.xml
-%{_datadir}/applications/ca.desrt.dconf-editor.desktop
-%{_datadir}/dbus-1/services/ca.desrt.dconf-editor.service
-%{_datadir}/glib-2.0/schemas/ca.desrt.dconf-editor.gschema.xml
-%{_datadir}/icons/hicolor/*/apps/dconf-editor.png
-%{_datadir}/icons/HighContrast/*/apps/dconf-editor.png
-%{_mandir}/man1/dconf-editor.1.gz
-
 %changelog
+* Mon Mar  6 2017 Marek Kasik <mkasik@redhat.com> - 0.26.0-2
+- Restore permissions on updated database
+- Resolves: #1281253
+
+* Fri Feb 10 2017 Marek Kasik <mkasik@redhat.com> - 0.26.0-1
+- Update to 0.26.0
+- Remove editor subpackage
+- Return libdbus-1 library (not header or pkgconfig files)
+- Resolves: #1386841
+
 * Tue Mar 24 2015 Marek Kasik <mkasik@redhat.com> - 0.22.0-2
 - Remove unused patches
 - Resolves: #1174448
@@ -333,7 +314,7 @@ done
 * Wed Jun 02 2010 Bastien Nocera <bnocera@redhat.com> 0.3.1-2
 - Rebuild against latest glib2
 
-* Tue May 24 2010 Matthias Clasen <mclasen@redhat.com> 0.3.1-1
+* Mon May 24 2010 Matthias Clasen <mclasen@redhat.com> 0.3.1-1
 - Update to 0.3.1
 - Add a -devel subpackage
 

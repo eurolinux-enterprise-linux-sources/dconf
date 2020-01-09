@@ -8,6 +8,9 @@
 <ANCHOR id="DCONF-ERROR:CAPS" href="dconf/dconf-DConfError.html#DCONF-ERROR:CAPS">
 <ANCHOR id="dconf-DConfError.other_details" href="dconf/dconf-DConfError.html#dconf-DConfError.other_details">
 <ANCHOR id="DConfError" href="dconf/dconf-DConfError.html#DConfError">
+<ANCHOR id="DCONF-ERROR-FAILED:CAPS" href="dconf/dconf-DConfError.html#DCONF-ERROR-FAILED:CAPS">
+<ANCHOR id="DCONF-ERROR-PATH:CAPS" href="dconf/dconf-DConfError.html#DCONF-ERROR-PATH:CAPS">
+<ANCHOR id="DCONF-ERROR-NOT-WRITABLE:CAPS" href="dconf/dconf-DConfError.html#DCONF-ERROR-NOT-WRITABLE:CAPS">
 <ANCHOR id="dconf-dconf-Paths" href="dconf/dconf-dconf-Paths.html">
 <ANCHOR id="dconf-dconf-Paths.functions" href="dconf/dconf-dconf-Paths.html#dconf-dconf-Paths.functions">
 <ANCHOR id="dconf-dconf-Paths.description" href="dconf/dconf-dconf-Paths.html#dconf-dconf-Paths.description">
@@ -52,7 +55,9 @@
 <ANCHOR id="DConfClient.functions_details" href="dconf/DConfClient.html#DConfClient.functions_details">
 <ANCHOR id="dconf-client-new" href="dconf/DConfClient.html#dconf-client-new">
 <ANCHOR id="dconf-client-read" href="dconf/DConfClient.html#dconf-client-read">
+<ANCHOR id="dconf-client-read-full" href="dconf/DConfClient.html#dconf-client-read-full">
 <ANCHOR id="dconf-client-list" href="dconf/DConfClient.html#dconf-client-list">
+<ANCHOR id="dconf-client-list-locks" href="dconf/DConfClient.html#dconf-client-list-locks">
 <ANCHOR id="dconf-client-is-writable" href="dconf/DConfClient.html#dconf-client-is-writable">
 <ANCHOR id="dconf-client-write-fast" href="dconf/DConfClient.html#dconf-client-write-fast">
 <ANCHOR id="dconf-client-write-sync" href="dconf/DConfClient.html#dconf-client-write-sync">
@@ -65,10 +70,14 @@
 <ANCHOR id="dconf-client-sync" href="dconf/DConfClient.html#dconf-client-sync">
 <ANCHOR id="DConfClient.other_details" href="dconf/DConfClient.html#DConfClient.other_details">
 <ANCHOR id="DConfClient-struct" href="dconf/DConfClient.html#DConfClient-struct">
+<ANCHOR id="DConfReadFlags" href="dconf/DConfClient.html#DConfReadFlags">
+<ANCHOR id="DCONF-READ-FLAGS-NONE:CAPS" href="dconf/DConfClient.html#DCONF-READ-FLAGS-NONE:CAPS">
+<ANCHOR id="DCONF-READ-DEFAULT-VALUE:CAPS" href="dconf/DConfClient.html#DCONF-READ-DEFAULT-VALUE:CAPS">
+<ANCHOR id="DCONF-READ-USER-VALUE:CAPS" href="dconf/DConfClient.html#DCONF-READ-USER-VALUE:CAPS">
 <ANCHOR id="DConfClient.signal-details" href="dconf/DConfClient.html#DConfClient.signal-details">
 <ANCHOR id="DConfClient-changed" href="dconf/DConfClient.html#DConfClient-changed">
+<ANCHOR id="DConfClient-writability-changed" href="dconf/DConfClient.html#DConfClient-writability-changed">
 <ANCHOR id="dconf-service" href="dconf/dconf-service.html">
-<ANCHOR id="dconf-editor" href="dconf/dconf-editor.html">
 <ANCHOR id="dconf-tool" href="dconf/dconf-tool.html">
 <ANCHOR id="annotation-glossterm-allow-none" href="dconf/annotation-glossary.html#annotation-glossterm-allow-none">
 <ANCHOR id="annotation-glossterm-out" href="dconf/annotation-glossary.html#annotation-glossterm-out">

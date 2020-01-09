@@ -23,6 +23,7 @@
 #include "dconf-client.h"
 
 #include "../engine/dconf-engine.h"
+#include "../common/dconf-paths.h"
 #include <glib-object.h>
 
 /**
@@ -62,6 +63,7 @@ G_DEFINE_TYPE (DConfClient, dconf_client, G_TYPE_OBJECT)
 enum
 {
   SIGNAL_CHANGED,
+  SIGNAL_WRITABILITY_CHANGED,
   N_SIGNALS
 };
 static guint dconf_client_signals[N_SIGNALS];
@@ -86,7 +88,9 @@ dconf_client_init (DConfClient *client)
 static void
 dconf_client_class_init (DConfClientClass *class)
 {
-  class->finalize = dconf_client_finalize;
+  GObjectClass *object_class = G_OBJECT_CLASS (class);
+
+  object_class->finalize = dconf_client_finalize;
 
   /**
    * DConfClient::changed:
@@ -132,6 +136,20 @@ dconf_client_class_init (DConfClientClass *class)
                                                        G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE,
                                                        G_TYPE_STRV | G_SIGNAL_TYPE_STATIC_SCOPE,
                                                        G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE);
+
+  /**
+   * DConfClient::writability-changed:
+   * @client: the #DConfClient reporting the change
+   * @path: the dir or key that changed
+   *
+   * Signal emitted when writability for a key (or all keys in a dir) changes.
+   * It will be immediately followed by #DConfClient::changed signal for
+   * the path.
+   */
+  dconf_client_signals[SIGNAL_WRITABILITY_CHANGED] = g_signal_new ("writability-changed", DCONF_TYPE_CLIENT,
+                                                                   G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
+                                                                   G_TYPE_NONE, 1,
+                                                                   G_TYPE_STRING | G_SIGNAL_TYPE_STATIC_SCOPE);
 }
 
 typedef struct
@@ -140,12 +158,23 @@ typedef struct
   gchar        *prefix;
   gchar       **changes;
   gchar        *tag;
+  gboolean      is_writability;
 } DConfClientChange;
 
 static gboolean
 dconf_client_dispatch_change_signal (gpointer user_data)
 {
   DConfClientChange *change = user_data;
+
+  if (change->is_writability)
+    {
+      /* We know that the engine does it this way... */
+      g_assert (change->changes[0][0] == '\0' && change->changes[1] == NULL);
+
+      g_signal_emit (change->client,
+                     dconf_client_signals[SIGNAL_WRITABILITY_CHANGED], 0,
+                     change->prefix);
+    }
 
   g_signal_emit (change->client, dconf_client_signals[SIGNAL_CHANGED], 0,
                  change->prefix, change->changes, change->tag);
@@ -184,6 +213,7 @@ dconf_engine_change_notify (DConfEngine         *engine,
   change->prefix = g_strdup (prefix);
   change->changes = g_strdupv ((gchar **) changes);
   change->tag = g_strdup (tag);
+  change->is_writability = is_writability;
 
   g_main_context_invoke (client->context, dconf_client_dispatch_change_signal, change);
 }
@@ -239,7 +269,71 @@ dconf_client_read (DConfClient *client,
 {
   g_return_val_if_fail (DCONF_IS_CLIENT (client), NULL);
 
-  return dconf_engine_read (client->engine, NULL, key);
+  return dconf_engine_read (client->engine, DCONF_READ_FLAGS_NONE, NULL, key);
+}
+
+/**
+ * DConfReadFlags:
+ * @DCONF_READ_FLAGS_NONE: no flags
+ * @DCONF_READ_DEFAULT_VALUE: read the default value, ignoring any
+ *   values in writable databases or any queued changes.  This is
+ *   effectively equivalent to asking what value would be read after a
+ *   reset was written for the key in question.
+ * @DCONF_READ_USER_VALUE: read the user value, ignoring any system
+ *   databases, including ignoring locks.  It is even possible to read
+ *   "invisible" values in the user database in this way, which would
+ *   have normally been ignored because of locks.
+ *
+ * Since: 0.26
+ */
+
+/**
+ * dconf_client_read_full:
+ * @client: a #DConfClient
+ * @key: the key to read the default value of
+ * @flags: #DConfReadFlags
+ * @read_through: a #GQueue of #DConfChangeset
+ *
+ * Reads the current value of @key.
+ *
+ * If @flags contains %DCONF_READ_USER_VALUE then only the user value
+ * will be read.  Locks are ignored, which means that it is possible to
+ * use this API to read "invisible" user values which are hidden by
+ * system locks.
+ *
+ * If @flags contains %DCONF_READ_DEFAULT_VALUE then only non-user
+ * values will be read.  The result will be exactly equivalent to the
+ * value that would be read if the current value of the key were to be
+ * reset.
+ *
+ * Flags may not contain both %DCONF_READ_USER_VALUE and
+ * %DCONF_READ_DEFAULT_VALUE.
+ *
+ * If @read_through is non-%NULL, %DCONF_READ_DEFAULT_VALUE is not
+ * given then @read_through is checked for the key in question, subject
+ * to the restriction that the key in question is writable.  This
+ * effectively answers the question of "what would happen if these
+ * changes were committed".
+ *
+ * If there are outstanding "fast" changes in progress they may affect
+ * the result of this call.
+ *
+ * If @flags is %DCONF_READ_FLAGS_NONE and @read_through is %NULL then
+ * this call is exactly equivalent to dconf_client_read().
+ *
+ * Returns: a #GVariant, or %NULL
+ *
+ * Since: 0.26
+ */
+GVariant *
+dconf_client_read_full (DConfClient    *client,
+                        const gchar    *key,
+                        DConfReadFlags  flags,
+                        const GQueue   *read_through)
+{
+  g_return_val_if_fail (DCONF_IS_CLIENT (client), NULL);
+
+  return dconf_engine_read (client->engine, flags, read_through, key);
 }
 
 /**
@@ -267,6 +361,34 @@ dconf_client_list (DConfClient *client,
   g_return_val_if_fail (DCONF_IS_CLIENT (client), NULL);
 
   return dconf_engine_list (client->engine, dir, length);
+}
+
+/**
+ * dconf_client_list_locks:
+ * @client: a #DConfClient
+ * @dir: the dir to limit results to
+ * @length: the length of the returned list.
+ *
+ * Lists all locks under @dir in effect for @client.
+ *
+ * If no locks are in effect, an empty list is returned.  If no keys are
+ * writable at all then a list containing @dir is returned.
+ *
+ * The returned list will be %NULL-terminated.
+ *
+ * Returns: an array of strings, never %NULL.
+ *
+ * Since: 0.26
+ */
+gchar **
+dconf_client_list_locks (DConfClient *client,
+                         const gchar *dir,
+                         gint        *length)
+{
+  g_return_val_if_fail (DCONF_IS_CLIENT (client), NULL);
+  g_return_val_if_fail (dconf_is_dir (dir, NULL), NULL);
+
+  return dconf_engine_list_locks (client->engine, dir, length);
 }
 
 /**

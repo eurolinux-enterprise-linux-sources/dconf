@@ -1,0 +1,11 @@
+--- dconf-0.26.0/dbus-1/dconf-dbus-1.c.orig	2017-02-10 16:56:10.000000000 +0100
++++ dconf-0.26.0/dbus-1/dconf-dbus-1.c	2017-02-10 16:56:15.686442282 +0100
+@@ -78,7 +78,7 @@ GVariant *
+ dconf_dbus_client_read (DConfDBusClient *dcdbc,
+                         const gchar     *key)
+ {
+-  return dconf_engine_read (dcdbc->engine, NULL, key);
++  return dconf_engine_read (dcdbc->engine, DCONF_READ_FLAGS_NONE, NULL, key);
+ }
+ 
+ gboolean

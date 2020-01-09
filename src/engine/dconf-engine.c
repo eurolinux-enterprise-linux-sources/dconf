@@ -22,7 +22,7 @@
 #define _XOPEN_SOURCE 600
 #include "dconf-engine.h"
 
-#include "../common/dconf-error.h"
+#include "../common/dconf-enums.h"
 #include "../common/dconf-paths.h"
 #include "../gvdb/gvdb-reader.h"
 #include <string.h>
@@ -363,15 +363,80 @@ dconf_engine_is_writable (DConfEngine *engine,
   return writable;
 }
 
+gchar **
+dconf_engine_list_locks (DConfEngine *engine,
+                         const gchar *path,
+                         gint        *length)
+{
+  gchar **strv;
+
+  if (dconf_is_dir (path, NULL))
+    {
+      GHashTable *set;
+
+      set = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+      dconf_engine_acquire_sources (engine);
+
+      if (engine->n_sources > 0 && engine->sources[0]->writable)
+        {
+          gint i, j;
+
+          for (i = 1; i < engine->n_sources; i++)
+            {
+              if (engine->sources[i]->locks)
+                {
+                  strv = gvdb_table_get_names (engine->sources[i]->locks, NULL);
+
+                  for (j = 0; strv[j]; j++)
+                    {
+                      /* It is not currently possible to lock dirs, so we
+                       * don't (yet) have to check the other direction.
+                       */
+                      if (g_str_has_prefix (strv[j], path))
+                        g_hash_table_add (set, strv[j]);
+                      else
+                        g_free (strv[j]);
+                    }
+
+                  g_free (strv);
+                }
+            }
+        }
+      else
+        g_hash_table_add (set, g_strdup (path));
+
+      dconf_engine_release_sources (engine);
+
+      strv = (gchar **) g_hash_table_get_keys_as_array (set, (guint *) length);
+      g_hash_table_steal_all (set);
+      g_hash_table_unref (set);
+    }
+  else
+    {
+      if (dconf_engine_is_writable (engine, path))
+        {
+          strv = g_new0 (gchar *, 0 + 1);
+        }
+      else
+        {
+          strv = g_new0 (gchar *, 1 + 1);
+          strv[0] = g_strdup (path);
+        }
+    }
+
+  return strv;
+}
+
 static gboolean
-dconf_engine_find_key_in_queue (GQueue       *queue,
-                                const gchar  *key,
-                                GVariant    **value)
+dconf_engine_find_key_in_queue (const GQueue  *queue,
+                                const gchar   *key,
+                                GVariant     **value)
 {
   GList *node;
 
   /* Tail to head... */
-  for (node = g_queue_peek_tail_link (queue); node; node = node->prev)
+  for (node = queue->tail; node; node = node->prev)
     if (dconf_changeset_get (node->data, key, value))
       return TRUE;
 
@@ -379,9 +444,10 @@ dconf_engine_find_key_in_queue (GQueue       *queue,
 }
 
 GVariant *
-dconf_engine_read (DConfEngine *engine,
-                   GQueue      *read_through,
-                   const gchar *key)
+dconf_engine_read (DConfEngine    *engine,
+                   DConfReadFlags  flags,
+                   const GQueue   *read_through,
+                   const gchar    *key)
 {
   GVariant *value = NULL;
   gint lock_level = 0;
@@ -410,6 +476,19 @@ dconf_engine_read (DConfEngine *engine,
    *
    *   This statement includes read_through and queued changes.  If a
    *   lock is found, we will ignore those.
+   *
+   * With respect to flags:
+   *
+   *   If DCONF_READ_USER_VALUE is given then we completely ignore all
+   *   locks, returning the user value all the time, even if it is not
+   *   visible (because of a lock).  This includes any pending value
+   *   that is in the read_through or pending queues.
+   *
+   *   If DCONF_READ_DEFAULT_VALUE is given then we skip the writable
+   *   database and the queues (including read_through, which is
+   *   meaningless in this case) and skip directly to the non-writable
+   *   databases.  This is defined as the value that the user would see
+   *   if they were to have just done a reset for that key.
    *
    * With respect to read_through and queued changed:
    *
@@ -489,20 +568,29 @@ dconf_engine_read (DConfEngine *engine,
    *
    * Note: i > 0 (strictly).  Ignore locks for source #0.
    */
-  for (i = engine->n_sources - 1; i > 0; i--)
-    if (engine->sources[i]->locks && gvdb_table_has_value (engine->sources[i]->locks, key))
-      {
-        lock_level = i;
-        break;
-      }
+  if (~flags & DCONF_READ_USER_VALUE)
+    for (i = engine->n_sources - 1; i > 0; i--)
+      if (engine->sources[i]->locks && gvdb_table_has_value (engine->sources[i]->locks, key))
+        {
+          lock_level = i;
+          break;
+        }
 
   /* Only do steps 2 to 4 if we have no locks and we have a writable source. */
   if (!lock_level && engine->n_sources != 0 && engine->sources[0]->writable)
     {
       gboolean found_key = FALSE;
 
+      /* If the user has requested the default value only, then ensure
+       * that we "find" a NULL value here.  This is equivalent to the
+       * user having reset the key, which is the definition of this
+       * flag.
+       */
+      if (flags & DCONF_READ_DEFAULT_VALUE)
+        found_key = TRUE;
+
       /* Step 2.  Check read_through. */
-      if (read_through)
+      if (!found_key && read_through)
         found_key = dconf_engine_find_key_in_queue (read_through, key, &value);
 
       /* Step 3.  Check queued changes if we didn't find it in read_through.
@@ -535,61 +623,15 @@ dconf_engine_read (DConfEngine *engine,
     }
 
   /* Step 5.  Check the remaining sources, until value != NULL. */
-  for (i = lock_level; value == NULL && i < engine->n_sources; i++)
-    {
-      if (engine->sources[i]->values == NULL)
-        continue;
+  if (~flags & DCONF_READ_USER_VALUE)
+    for (i = lock_level; value == NULL && i < engine->n_sources; i++)
+      {
+        if (engine->sources[i]->values == NULL)
+          continue;
 
-      if ((value = gvdb_table_get_value (engine->sources[i]->values, key)))
-        break;
-    }
-
-  dconf_engine_release_sources (engine);
-
-  return value;
-}
-
-GVariant *
-dconf_engine_read_user_value (DConfEngine *engine,
-                              GQueue      *read_through,
-                              const gchar *key)
-{
-  gboolean found_key = FALSE;
-  GVariant *value = NULL;
-
-  /* This is a simplified version of the above.  We get to ignore locks
-   * and system-level settings.
-   *
-   * NB: we may find "NULL", which is why we have a separate variable.
-   */
-
-  /* Ignore the queues if we don't have a writable database */
-  if (engine->n_sources == 0 || !engine->sources[0]->writable)
-    return NULL;
-
-  dconf_engine_acquire_sources (engine);
-
-  /* First check read-through */
-  if (read_through)
-    found_key = dconf_engine_find_key_in_queue (read_through, key, &value);
-
-  /* Next pending/in-flight */
-  if (!found_key)
-    {
-      dconf_engine_lock_queues (engine);
-
-      /* Check the pending queue first because those were submitted
-       * more recently.
-       */
-      found_key = dconf_engine_find_key_in_queue (&engine->pending, key, &value) ||
-                  dconf_engine_find_key_in_queue (&engine->in_flight, key, &value);
-
-      dconf_engine_unlock_queues (engine);
-    }
-
-  /* Finally, check the user database */
-  if (!found_key && engine->sources[0]->values)
-    value = gvdb_table_get_value (engine->sources[0]->values, key);
+        if ((value = gvdb_table_get_value (engine->sources[i]->values, key)))
+          break;
+      }
 
   dconf_engine_release_sources (engine);
 

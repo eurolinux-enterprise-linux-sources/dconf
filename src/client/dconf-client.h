@@ -22,24 +22,28 @@
 
 #include <gio/gio.h>
 #include "../common/dconf-changeset.h"
+#include "../common/dconf-enums.h"
 
 G_BEGIN_DECLS
 
 #define DCONF_TYPE_CLIENT       (dconf_client_get_type ())
-#define DCONF_CLIENT(inst)      (G_TYPE_CHECK_INSTANCE_CAST ((inst), DCONF_TYPE_CLIENT, DConfClient))
-#define DCONF_IS_CLIENT(inst)   (G_TYPE_CHECK_INSTANCE_TYPE ((inst), DCONF_TYPE_CLIENT))
-
-typedef GObjectClass DConfClientClass;
-typedef struct _DConfClient DConfClient;
-
-GType                   dconf_client_get_type                           (void);
+G_DECLARE_FINAL_TYPE(DConfClient, dconf_client, DCONF, CLIENT, GObject)
 
 DConfClient *           dconf_client_new                                (void);
 
 GVariant *              dconf_client_read                               (DConfClient          *client,
                                                                          const gchar          *key);
 
+GVariant *              dconf_client_read_full                          (DConfClient          *client,
+                                                                         const gchar          *key,
+                                                                         DConfReadFlags        flags,
+                                                                         const GQueue         *read_through);
+
 gchar **                dconf_client_list                               (DConfClient          *client,
+                                                                         const gchar          *dir,
+                                                                         gint                 *length);
+
+gchar **                dconf_client_list_locks                         (DConfClient          *client,
                                                                          const gchar          *dir,
                                                                          gint                 *length);
 
@@ -77,6 +81,7 @@ void                    dconf_client_unwatch_sync                       (DConfCl
                                                                          const gchar          *path);
 
 void                    dconf_client_sync                               (DConfClient          *client);
+
 
 G_END_DECLS
 

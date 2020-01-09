@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>dconf Reference Manual: DConfChangeset</title>
+<title>DConfChangeset: dconf Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="dconf Reference Manual">
 <link rel="up" href="ch01.html" title="DConf Client API">
 <link rel="prev" href="dconf-dconf-Paths.html" title="dconf Paths">
 <link rel="next" href="DConfClient.html" title="DConfClient">
-<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -41,7 +41,7 @@
 <tbody>
 <tr>
 <td class="function_type">
-<span class="returnvalue">gboolean</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <span class="c_punctuation">(</span><a href="dconf-DConfChangeset.html#DConfChangesetPredicate">*DConfChangesetPredicate</a><span class="c_punctuation">)</span> <span class="c_punctuation">()</span>
@@ -49,7 +49,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">gboolean</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-all">dconf_changeset_all</a> <span class="c_punctuation">()</span>
@@ -65,7 +65,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">guint</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-describe">dconf_changeset_describe</a> <span class="c_punctuation">()</span>
@@ -89,7 +89,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">gboolean</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-get">dconf_changeset_get</a> <span class="c_punctuation">()</span>
@@ -97,7 +97,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">gboolean</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-is-empty">dconf_changeset_is_empty</a> <span class="c_punctuation">()</span>
@@ -105,7 +105,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">gboolean</span>
+<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-is-similar-to">dconf_changeset_is_similar_to</a> <span class="c_punctuation">()</span>
@@ -145,7 +145,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">GVariant</span> *
+<a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="returnvalue">GVariant</span></a> *
 </td>
 <td class="function_name">
 <a href="dconf-DConfChangeset.html#dconf-changeset-serialise">dconf_changeset_serialise</a> <span class="c_punctuation">()</span>
@@ -206,10 +206,10 @@ common case of writing or resetting a single value.</p>
 <a name="dconf-DConfChangeset.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
 <a name="DConfChangesetPredicate"></a><h3>DConfChangesetPredicate ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>
-<span class="c_punctuation">(</span>*DConfChangesetPredicate<span class="c_punctuation">)</span> (<em class="parameter"><code>const <span class="type">gchar</span> *path</code></em>,
-                            <em class="parameter"><code><span class="type">GVariant</span> *value</code></em>,
-                            <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+<span class="c_punctuation">(</span>*DConfChangesetPredicate<span class="c_punctuation">)</span> (<em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *path</code></em>,
+                            <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> *value</code></em>,
+                            <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>Callback function type for predicates over items in a
 <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a>.</p>
 <p>Use with <a href="dconf-DConfChangeset.html#dconf-changeset-all"><code class="function">dconf_changeset_all()</code></a>.</p>
@@ -229,7 +229,7 @@ common case of writing or resetting a single value.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>value</p></td>
-<td class="parameter_description"><p>a <span class="type">GVariant</span>, or <code class="literal">NULL</code></p></td>
+<td class="parameter_description"><p>a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -242,28 +242,27 @@ common case of writing or resetting a single value.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.2.7"></a><h4>Returns</h4>
-<p> <code class="literal">TRUE</code> if the predicate is met for the given <em class="parameter"><code>path</code></em>
+<p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the predicate is met for the given <em class="parameter"><code>path</code></em>
 and <em class="parameter"><code>value</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-all"></a><h3>dconf_changeset_all ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 dconf_changeset_all (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>,
                      <em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangesetPredicate"><span class="type">DConfChangesetPredicate</span></a> predicate</code></em>,
-                     <em class="parameter"><code><span class="type">gpointer</span> user_data</code></em>);</pre>
+                     <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>Checks if all changes in the changeset satisfy <em class="parameter"><code>predicate</code></em>
 .</p>
 <p><em class="parameter"><code>predicate</code></em>
  is called on each item in the changeset, in turn, until it
-returns <code class="literal">FALSE</code>.</p>
+returns <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
 <p>If <em class="parameter"><code>predicate</code></em>
- returns <code class="literal">FALSE</code> for any item, this function returns
-<code class="literal">FALSE</code>.  If not (including the case of no items) then this function
-returns <code class="literal">TRUE</code>.</p>
+ returns <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> for any item, this function returns
+<a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.  If not (including the case of no items) then this function
+returns <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>.</p>
 <div class="refsect3">
 <a name="id-1.3.4.6.3.7"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -294,10 +293,9 @@ returns <code class="literal">TRUE</code>.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.3.8"></a><h4>Returns</h4>
-<p> <code class="literal">TRUE</code> if all items in <em class="parameter"><code>changeset</code></em>
+<p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if all items in <em class="parameter"><code>changeset</code></em>
 satisfy <em class="parameter"><code>predicate</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -343,16 +341,16 @@ case the two changesets are effectively being merged.</p>
 </tbody>
 </table></div>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: 0.16</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-describe"></a><h3>dconf_changeset_describe ()</h3>
-<pre class="programlisting"><span class="returnvalue">guint</span>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint"><span class="returnvalue">guint</span></a>
 dconf_changeset_describe (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>,
-                          <em class="parameter"><code>const <span class="type">gchar</span> **prefix</code></em>,
-                          <em class="parameter"><code>const <span class="type">gchar</span> * const **paths</code></em>,
-                          <em class="parameter"><code><span class="type">GVariant</span> * const **values</code></em>);</pre>
+                          <em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **prefix</code></em>,
+                          <em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> * const **paths</code></em>,
+                          <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> * const **values</code></em>);</pre>
 <p>Describes <em class="parameter"><code>changeset</code></em>
 .</p>
 <p><em class="parameter"><code>prefix</code></em>
@@ -364,8 +362,8 @@ as <em class="parameter"><code>paths</code></em>
 .  For each key described by an element in <em class="parameter"><code>paths</code></em>
 , <em class="parameter"><code>values</code></em>
 
-will contain either a <span class="type">GVariant</span> (the requested new value of that key)
-or <code class="literal">NULL</code> (to reset a reset).</p>
+will contain either a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> (the requested new value of that key)
+or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (to reset a reset).</p>
 <p>The <em class="parameter"><code>paths</code></em>
  array is returned in an order such that dir will always
 come before keys contained within those dirs.</p>
@@ -410,14 +408,13 @@ seal it.  See <a href="dconf-DConfChangeset.html#dconf-changeset-seal"><code cla
 <p> the number of changes (the length of <em class="parameter"><code>changes</code></em>
 and <em class="parameter"><code>values</code></em>
 ).</p>
-<p></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-deserialise"></a><h3>dconf_changeset_deserialise ()</h3>
 <pre class="programlisting"><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="returnvalue">DConfChangeset</span></a> *
-dconf_changeset_deserialise (<em class="parameter"><code><span class="type">GVariant</span> *serialised</code></em>);</pre>
+dconf_changeset_deserialise (<em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> *serialised</code></em>);</pre>
 <p>Creates a <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> according to a serialised description
 returned from an earlier call to <a href="dconf-DConfChangeset.html#dconf-changeset-serialise"><code class="function">dconf_changeset_serialise()</code></a>.</p>
 <p><em class="parameter"><code>serialised</code></em>
@@ -436,7 +433,7 @@ format.  Improperly-formatted parts are simply ignored.</p>
 </colgroup>
 <tbody><tr>
 <td class="parameter_name"><p>serialised</p></td>
-<td class="parameter_description"><p>a <span class="type">GVariant</span> from <a href="dconf-DConfChangeset.html#dconf-changeset-serialise"><code class="function">dconf_changeset_serialise()</code></a></p></td>
+<td class="parameter_description"><p>a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> from <a href="dconf-DConfChangeset.html#dconf-changeset-serialise"><code class="function">dconf_changeset_serialise()</code></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr></tbody>
 </table></div>
@@ -444,7 +441,6 @@ format.  Improperly-formatted parts are simply ignored.</p>
 <div class="refsect3">
 <a name="id-1.3.4.6.6.8"></a><h4>Returns</h4>
 <p> a new <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -455,7 +451,7 @@ dconf_changeset_diff (<em class="parameter"><code><a href="dconf-DConfChangeset.
                       <em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *to</code></em>);</pre>
 <p>Compares to database-mode changesets and produces a changeset that
 describes their differences.</p>
-<p>If there is no difference, <code class="literal">NULL</code> is returned.</p>
+<p>If there is no difference, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned.</p>
 <p>Applying the returned changeset to <em class="parameter"><code>from</code></em>
  using
 <a href="dconf-DConfChangeset.html#dconf-changeset-change"><code class="function">dconf_changeset_change()</code></a> will result in the two changesets being
@@ -484,29 +480,29 @@ equal.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.7.8"></a><h4>Returns</h4>
-<p> the changes, or <code class="literal">NULL</code>. </p>
+<p> the changes, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: 0.16</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-get"></a><h3>dconf_changeset_get ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 dconf_changeset_get (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>,
-                     <em class="parameter"><code>const <span class="type">gchar</span> *key</code></em>,
-                     <em class="parameter"><code><span class="type">GVariant</span> **value</code></em>);</pre>
+                     <em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *key</code></em>,
+                     <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> **value</code></em>);</pre>
 <p>Checks if a <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> has an outstanding request to change
 the value of the given <em class="parameter"><code>key</code></em>
 .</p>
 <p>If the change doesn't involve <em class="parameter"><code>key</code></em>
- then <code class="literal">FALSE</code> is returned and the
+ then <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> is returned and the
 <em class="parameter"><code>value</code></em>
  is unmodified.</p>
 <p>If the change modifies <em class="parameter"><code>key</code></em>
  then <em class="parameter"><code>value</code></em>
  is set either to the value
-for that key, or <code class="literal">NULL</code> in the case that the key is being reset by the
+for that key, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in the case that the key is being reset by the
 request.</p>
 <div class="refsect3">
 <a name="id-1.3.4.6.8.7"></a><h4>Parameters</h4>
@@ -529,7 +525,7 @@ request.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>value</p></td>
-<td class="parameter_description"><p>a return location for the value, or <code class="literal">NULL</code></p></td>
+<td class="parameter_description"><p>a return location for the value, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -537,14 +533,13 @@ request.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.8.8"></a><h4>Returns</h4>
-<p> <code class="literal">TRUE</code> if the key is being modified by the change</p>
-<p></p>
+<p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the key is being modified by the change</p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-is-empty"></a><h3>dconf_changeset_is_empty ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 dconf_changeset_is_empty (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>);</pre>
 <p>Checks if <em class="parameter"><code>changeset</code></em>
  is empty (ie: contains no changes).</p>
@@ -565,15 +560,14 @@ dconf_changeset_is_empty (<em class="parameter"><code><a href="dconf-DConfChange
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.9.6"></a><h4>Returns</h4>
-<p> <code class="literal">TRUE</code> if <em class="parameter"><code>changeset</code></em>
+<p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>changeset</code></em>
 is empty</p>
-<p></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-is-similar-to"></a><h3>dconf_changeset_is_similar_to ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 dconf_changeset_is_similar_to (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>,
                                <em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *other</code></em>);</pre>
 <p>Checks if <em class="parameter"><code>changeset</code></em>
@@ -612,8 +606,7 @@ extremely rare.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.10.9"></a><h4>Returns</h4>
-<p> <code class="literal">TRUE</code> if the changes are similar</p>
-<p></p>
+<p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the changes are similar</p>
 </div>
 </div>
 <hr>
@@ -625,7 +618,6 @@ dconf_changeset_new (<em class="parameter"><code><span class="type">void</span><
 <div class="refsect3">
 <a name="id-1.3.4.6.11.5"></a><h4>Returns</h4>
 <p> the new <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a>.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -649,7 +641,7 @@ operations (such as the <em class="parameter"><code>change</code></em>
 or the <em class="parameter"><code>changeset</code></em>
  argument to <a href="DConfClient.html"><span class="type">DConfClient</span></a> APIs).</p>
 <p>If <em class="parameter"><code>copy_of</code></em>
- is non-<code class="literal">NULL</code> then its contents will be copied into the
+ is non-<a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> then its contents will be copied into the
 created changeset.  <em class="parameter"><code>copy_of</code></em>
  must be a database-mode changeset.</p>
 <div class="refsect3">
@@ -670,16 +662,15 @@ created changeset.  <em class="parameter"><code>copy_of</code></em>
 <div class="refsect3">
 <a name="id-1.3.4.6.12.10"></a><h4>Returns</h4>
 <p> a new <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> in "database" mode</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: 0.16</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-new-write"></a><h3>dconf_changeset_new_write ()</h3>
 <pre class="programlisting"><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="returnvalue">DConfChangeset</span></a> *
-dconf_changeset_new_write (<em class="parameter"><code>const <span class="type">gchar</span> *path</code></em>,
-                           <em class="parameter"><code><span class="type">GVariant</span> *value</code></em>);</pre>
+dconf_changeset_new_write (<em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *path</code></em>,
+                           <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> *value</code></em>);</pre>
 <p>Creates a new <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> with one change.  This is equivalent to
 calling <a href="dconf-DConfChangeset.html#dconf-changeset-new"><code class="function">dconf_changeset_new()</code></a> and then <a href="dconf-DConfChangeset.html#dconf-changeset-set"><code class="function">dconf_changeset_set()</code></a> with
 <em class="parameter"><code>path</code></em>
@@ -701,7 +692,7 @@ calling <a href="dconf-DConfChangeset.html#dconf-changeset-new"><code class="fun
 </tr>
 <tr>
 <td class="parameter_name"><p>value</p></td>
-<td class="parameter_description"><p>a <span class="type">GVariant</span>, or <code class="literal">NULL</code></p></td>
+<td class="parameter_description"><p>a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -710,7 +701,6 @@ calling <a href="dconf-DConfChangeset.html#dconf-changeset-new"><code class="fun
 <div class="refsect3">
 <a name="id-1.3.4.6.13.6"></a><h4>Returns</h4>
 <p> a new <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -739,13 +729,12 @@ dconf_changeset_ref (<em class="parameter"><code><a href="dconf-DConfChangeset.h
 <a name="id-1.3.4.6.14.6"></a><h4>Returns</h4>
 <p> <em class="parameter"><code>changeset</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="dconf-changeset-serialise"></a><h3>dconf_changeset_serialise ()</h3>
-<pre class="programlisting"><span class="returnvalue">GVariant</span> *
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="returnvalue">GVariant</span></a> *
 dconf_changeset_serialise (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>);</pre>
 <p>Serialises a <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a>.</p>
 <p>The returned value has no particular format and should only be passed
@@ -767,8 +756,7 @@ to <a href="dconf-DConfChangeset.html#dconf-changeset-deserialise"><code class="
 </div>
 <div class="refsect3">
 <a name="id-1.3.4.6.15.7"></a><h4>Returns</h4>
-<p> a floating <span class="type">GVariant</span></p>
-<p></p>
+<p> a floating <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a></p>
 </div>
 </div>
 <hr>
@@ -776,18 +764,18 @@ to <a href="dconf-DConfChangeset.html#dconf-changeset-deserialise"><code class="
 <a name="dconf-changeset-set"></a><h3>dconf_changeset_set ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 dconf_changeset_set (<em class="parameter"><code><a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a> *changeset</code></em>,
-                     <em class="parameter"><code>const <span class="type">gchar</span> *path</code></em>,
-                     <em class="parameter"><code><span class="type">GVariant</span> *value</code></em>);</pre>
+                     <em class="parameter"><code>const <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *path</code></em>,
+                     <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> *value</code></em>);</pre>
 <p>Adds an operation to modify <em class="parameter"><code>path</code></em>
  to a <a href="dconf-DConfChangeset.html#DConfChangeset"><span class="type">DConfChangeset</span></a>.</p>
 <p><em class="parameter"><code>path</code></em>
  may either be a key or a dir.  If it is a key then <em class="parameter"><code>value</code></em>
  may
-be a <span class="type">GVariant</span>, or <code class="literal">NULL</code> (to set or reset the key).</p>
+be a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (to set or reset the key).</p>
 <p>If <em class="parameter"><code>path</code></em>
  is a dir then this must be a reset operation: <em class="parameter"><code>value</code></em>
  must be
-<code class="literal">NULL</code>.  It is not permitted to assign a <span class="type">GVariant</span> value to a dir.</p>
+<a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.  It is not permitted to assign a <a href="https://developer.gnome.org/glib/unstable/glib-GVariant.html#GVariant"><span class="type">GVariant</span></a> value to a dir.</p>
 <div class="refsect3">
 <a name="id-1.3.4.6.16.7"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -809,7 +797,7 @@ be a <span class="type">GVariant</span>, or <code class="literal">NULL</code> (t
 </tr>
 <tr>
 <td class="parameter_name"><p>value</p></td>
-<td class="parameter_description"><p>the value for the key, or <code class="literal">NULL</code> to reset</p></td>
+<td class="parameter_description"><p>the value for the key, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to reset</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -871,7 +859,7 @@ made by copying changesets that are sealed.
 </tr></tbody>
 </table></div>
 </div>
-<p class="since">Since 0.18</p>
+<p class="since">Since: 0.18</p>
 </div>
 </div>
 <div class="refsect1">
@@ -880,14 +868,13 @@ made by copying changesets that are sealed.
 <a name="DConfChangeset"></a><h3>DConfChangeset</h3>
 <pre class="programlisting">typedef struct _DConfChangeset DConfChangeset;</pre>
 <p>This is a reference counted opaque structure type.  It is not a
-<span class="type">GObject</span>.</p>
+<a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#GObject"><span class="type">GObject</span></a>.</p>
 <p>Use <a href="dconf-DConfChangeset.html#dconf-changeset-ref"><code class="function">dconf_changeset_ref()</code></a> and <a href="dconf-DConfChangeset.html#dconf-changeset-unref"><code class="function">dconf_changeset_unref()</code></a> to manipulate
 references.</p>
 </div>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21.1</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>

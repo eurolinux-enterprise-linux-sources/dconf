@@ -17,36 +17,26 @@
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
 
-#include "config.h"
+#ifndef __dconf_error_h__
+#define __dconf_error_h__
 
-#include "dconf-enums.h"
+#include <glib.h>
 
-/**
- * SECTION:error
- * @title: DConfError
- * @short_description: GError error codes
- *
- * These are the error codes that can be returned from dconf APIs.
- **/
+#define DCONF_ERROR (dconf_error_quark ())
+GQuark dconf_error_quark (void);
 
-/**
- * DCONF_ERROR:
- *
- * The error domain of DConf.
- *
- * Since: 0.20
- **/
+typedef enum
+{
+  DCONF_ERROR_FAILED,
+  DCONF_ERROR_PATH,
+  DCONF_ERROR_NOT_WRITABLE
+} DConfError;
 
-/**
- * DConfError:
- * @DCONF_ERROR_FAILED: generic error
- * @DCONF_ERROR_PATH: the path given for the operation was a valid path
- *   or was not of the expected type (dir vs. key)
- * @DCONF_ERROR_NOT_WRITABLE: the given key was not writable
- *
- * Possible errors from DConf functions.
- *
- * Since: 0.20
- **/
+typedef enum
+{
+  DCONF_READ_FLAGS_NONE                 = 0,
+  DCONF_READ_DEFAULT_VALUE              = (1u << 0),
+  DCONF_READ_USER_VALUE                 = (1u << 1)
+} DConfReadFlags;
 
-G_DEFINE_QUARK (dconf_error, dconf_error)
+#endif /* __dconf_error_h__ */

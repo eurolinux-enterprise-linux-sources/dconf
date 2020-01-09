@@ -33,12 +33,17 @@ void show_help (bool requested, string? command) {
 			break;
 
 		case "read":
-			description = "Read the value of a key";
-			synopsis = " KEY ";
+			description = "Read the value of a key.  -d to read default values.";
+			synopsis = " [-d] KEY ";
 			break;
 
 		case "list":
 			description = "List the sub-keys and sub-dirs of a dir";
+			synopsis = " DIR ";
+			break;
+
+		case "list-locks":
+			description = "List the locks under a dir";
 			synopsis = " DIR ";
 			break;
 
@@ -64,17 +69,17 @@ void show_help (bool requested, string? command) {
 
 		case "watch":
 			description = "Watch a path for key changes";
-			synopsis = "PATH";
+			synopsis = " PATH ";
 			break;
 
 		case "dump":
 			description = "Dump an entire subpath to stdout";
-			synopsis = "DIR";
+			synopsis = " DIR ";
 			break;
 
 		case "load":
 			description = "Populate a subpath from stdin";
-			synopsis = "DIR";
+			synopsis = " DIR ";
 			break;
 
 		default:
@@ -156,11 +161,19 @@ void dconf_help (string[] args) throws Error {
 
 void dconf_read (string?[] args) throws Error {
 	var client = new DConf.Client ();
-	var key = args[2];
+	var flags = DConf.ReadFlags.NONE;
+	var index = 2;
+
+	if (args[index] == "-d") {
+		flags = DConf.ReadFlags.DEFAULT_VALUE;
+		index++;
+	}
+
+	var key = args[index];
 
 	DConf.verify_key (key);
 
-	var result = client.read (key);
+	var result = client.read_full (key, flags, null);
 
 	if (result != null) {
 		print ("%s\n", result.print (true));
@@ -174,6 +187,17 @@ void dconf_list (string?[] args) throws Error {
 	DConf.verify_dir (dir);
 
 	foreach (var item in client.list (dir)) {
+		print ("%s\n", item);
+	}
+}
+
+void dconf_list_locks (string?[] args) throws Error {
+	var client = new DConf.Client ();
+	var dir = args[2];
+
+	DConf.verify_dir (dir);
+
+	foreach (var item in client.list_locks (dir)) {
 		print ("%s\n", item);
 	}
 }
@@ -294,18 +318,19 @@ int main (string[] args) {
 	Intl.setlocale (LocaleCategory.ALL, "");
 
 	var map = new CommandMapping[] {
-		CommandMapping ("help",      dconf_help),
-		CommandMapping ("read",      dconf_read),
-		CommandMapping ("list",      dconf_list),
-		CommandMapping ("write",     dconf_write),
-		CommandMapping ("reset",     dconf_reset),
-		CommandMapping ("compile",   dconf_compile),
-		CommandMapping ("update",    dconf_update),
-		CommandMapping ("watch",     dconf_watch),
-		CommandMapping ("dump",      dconf_dump),
-		CommandMapping ("load",      dconf_load),
-		CommandMapping ("blame",     dconf_blame),
-		CommandMapping ("_complete", dconf_complete)
+		CommandMapping ("help",       dconf_help),
+		CommandMapping ("read",       dconf_read),
+		CommandMapping ("list",       dconf_list),
+		CommandMapping ("list-locks", dconf_list_locks),
+		CommandMapping ("write",      dconf_write),
+		CommandMapping ("reset",      dconf_reset),
+		CommandMapping ("compile",    dconf_compile),
+		CommandMapping ("update",     dconf_update),
+		CommandMapping ("watch",      dconf_watch),
+		CommandMapping ("dump",       dconf_dump),
+		CommandMapping ("load",       dconf_load),
+		CommandMapping ("blame",      dconf_blame),
+		CommandMapping ("_complete",  dconf_complete)
 	};
 
 	try {
