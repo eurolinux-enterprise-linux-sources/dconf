@@ -13,12 +13,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "dconf-client.h"
 
@@ -164,6 +164,7 @@ dconf_engine_change_notify (DConfEngine         *engine,
                             const gchar         *prefix,
                             const gchar * const *changes,
                             const gchar *        tag,
+                            gboolean             is_writability,
                             gpointer             origin_tag,
                             gpointer             user_data)
 {
@@ -212,7 +213,7 @@ dconf_client_new (void)
   client = g_object_new (DCONF_TYPE_CLIENT, NULL);
   weak_ref = g_slice_new (GWeakRef);
   g_weak_ref_init (weak_ref, client);
-  client->engine = dconf_engine_new (weak_ref, dconf_client_free_weak_ref);
+  client->engine = dconf_engine_new (NULL, weak_ref, dconf_client_free_weak_ref);
   client->context = g_main_context_ref_thread_default ();
 
   return client;

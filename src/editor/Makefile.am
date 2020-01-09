@@ -1,6 +1,6 @@
 include $(top_srcdir)/Makefile.gtester
 
-INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/client
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/client
 
 bin_PROGRAMS = dconf-editor
 
@@ -23,6 +23,16 @@ dconf_editor_CFLAGS = \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"\
 	-w
 
+resource_data = \
+	dconf-editor.gresource.xml	\
+	dconf-editor-menu.ui		\
+	dconf-editor.ui
+
+resources.c: $(resource_data)
+	$(AM_V_GEN) $(GLIB_COMPILE_RESOURCES) --sourcedir=$(srcdir) --target=$@ --generate-source $<
+
+nodist_dconf_editor_SOURCES = resources.c
+
 dconf_editor_SOURCES = \
 	config.vapi		\
 	dconf-editor.vala	\
@@ -31,10 +41,23 @@ dconf_editor_SOURCES = \
 	dconf-view.vala
 
 desktopdir = $(datadir)/applications
-desktop_in_files = dconf-editor.desktop.in.in
+desktop_in_files = ca.desrt.dconf-editor.desktop.in.in
 desktop_DATA = $(desktop_in_files:.desktop.in.in=.desktop)
-CLEANFILES = $(desktop_DATA)
 @INTLTOOL_DESKTOP_RULE@
+
+dbusservicedir = $(datadir)/dbus-1/services
+dbusservice_DATA = ca.desrt.dconf-editor.service
+
+ca.desrt.dconf-editor.service: Makefile
+	$(AM_V_GEN) (echo '[D-BUS Service]'; \
+		     echo 'Name=ca.desrt.dconf-editor'; \
+		     echo 'Exec=${bindir}/dconf-editor --gapplication-service') > $@.tmp && \
+		     mv $@.tmp $@
+
+CLEANFILES = $(desktop_DATA) $(dbusservice_DATA) resources.c
+
+appdatadir = $(datadir)/appdata
+dist_appdata_DATA = ca.desrt.dconf-editor.appdata.xml
 
 gsettings_SCHEMAS = ca.desrt.dconf-editor.gschema.xml
 @GSETTINGS_RULES@
@@ -64,7 +87,4 @@ update-icon-cache:
 		gtk-update-icon-cache -f -t $(datadir)/icons/hicolor; \
 	fi
 
-pkgdatadir = $(datadir)/dconf-editor
-dist_pkgdata_DATA = dconf-editor.ui dconf-editor-menu.ui
-
-EXTRA_DIST = $(gsettings_SCHEMAS) $(icons)
+EXTRA_DIST = $(gsettings_SCHEMAS) $(icons) $(resource_data)

@@ -12,9 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
@@ -29,14 +27,6 @@
 typedef struct _DConfEngine DConfEngine;
 
 typedef struct _DConfEngineCallHandle DConfEngineCallHandle;
-
-typedef enum
-{
-  DCONF_ERROR_FAILED,
-  DCONF_ERROR_NOT_WRITABLE
-} DConfEngineError;
-
-#define DCONF_ERROR (g_quark_from_static_string ("dconf error quark"))
 
 /* These functions need to be implemented by the client library */
 G_GNUC_INTERNAL
@@ -86,6 +76,7 @@ void                    dconf_engine_change_notify                      (DConfEn
                                                                          const gchar             *prefix,
                                                                          const gchar * const     *changes,
                                                                          const gchar             *tag,
+                                                                         gboolean                 is_writability,
                                                                          gpointer                 origin_tag,
                                                                          gpointer                 user_data);
 
@@ -105,7 +96,8 @@ void                    dconf_engine_handle_dbus_signal                 (GBusTyp
                                                                          GVariant                *parameters);
 
 G_GNUC_INTERNAL
-DConfEngine *           dconf_engine_new                                (gpointer                 user_data,
+DConfEngine *           dconf_engine_new                                (const gchar             *profile,
+                                                                         gpointer                 user_data,
                                                                          GDestroyNotify           free_func);
 
 G_GNUC_INTERNAL
@@ -121,6 +113,11 @@ gboolean                dconf_engine_is_writable                        (DConfEn
 
 G_GNUC_INTERNAL
 GVariant *              dconf_engine_read                               (DConfEngine             *engine,
+                                                                         GQueue                  *read_through,
+                                                                         const gchar             *key);
+
+G_GNUC_INTERNAL
+GVariant *              dconf_engine_read_user_value                    (DConfEngine             *engine,
                                                                          GQueue                  *read_through,
                                                                          const gchar             *key);
 

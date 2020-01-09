@@ -12,9 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
@@ -42,6 +40,36 @@ dconf_engine_dbus_call_async_func (GBusType                bus_type,
   return TRUE;
 }
 
+void
+dconf_mock_dbus_async_reply (GVariant *reply,
+                             GError   *error)
+{
+  DConfEngineCallHandle *handle;
+
+  g_assert (!g_queue_is_empty (&dconf_mock_dbus_outstanding_call_handles));
+  handle = g_queue_pop_head (&dconf_mock_dbus_outstanding_call_handles);
+
+  if (reply)
+    {
+      const GVariantType *expected_type;
+
+      expected_type = dconf_engine_call_handle_get_expected_type (handle);
+      g_assert (expected_type == NULL || g_variant_is_of_type (reply, expected_type));
+      g_variant_ref_sink (reply);
+    }
+
+  dconf_engine_call_handle_reply (handle, reply, error);
+
+  if (reply)
+    g_variant_unref (reply);
+}
+
+void
+dconf_mock_dbus_assert_no_async (void)
+{
+  g_assert (g_queue_is_empty (&dconf_mock_dbus_outstanding_call_handles));
+}
+
 DConfMockDBusSyncCallHandler dconf_mock_dbus_sync_call_handler;
 
 GVariant *
@@ -65,5 +93,7 @@ dconf_engine_dbus_call_sync_func (GBusType             bus_type,
 
   g_variant_unref (parameters);
 
-  return g_variant_take_ref (reply);
+  g_assert (reply != NULL || (error == NULL || *error != NULL));
+
+  return reply ? g_variant_take_ref (reply) : NULL;
 }

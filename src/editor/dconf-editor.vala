@@ -51,8 +51,7 @@ class ConfigurationEditor : Gtk.Application
         ui = new Gtk.Builder();
         try
         {
-            string[] objects = { "set_default_action", "box1", "menu" };
-            ui.add_objects_from_file(Path.build_filename(Config.PKGDATADIR, "dconf-editor.ui"), objects);
+            ui.add_from_resource("/ca/desrt/dconf-editor/dconf-editor.ui");
         }
         catch (Error e)
         {
@@ -63,12 +62,12 @@ class ConfigurationEditor : Gtk.Application
         window.title = _("dconf Editor");
         window.window_state_event.connect(main_window_window_state_event_cb);
         window.configure_event.connect(main_window_configure_event_cb);
-        window.add((Gtk.Box)ui.get_object("box1"));
+        window.add(ui.get_object("box1") as Gtk.Box);
 
         var menu_ui = new Gtk.Builder();
         try
         {
-            menu_ui.add_from_file(Path.build_filename(Config.PKGDATADIR, "dconf-editor-menu.ui"));
+            menu_ui.add_from_resource("/ca/desrt/dconf-editor/dconf-editor-menu.ui");
         }
         catch (Error e)
         {
@@ -86,43 +85,50 @@ class ConfigurationEditor : Gtk.Application
         dir_tree_view.set_model(model);
         dir_tree_view.get_selection().changed.connect(dir_selected_cb); // FIXME: Put in view
         dir_tree_view.show();
-        var scroll = (Gtk.ScrolledWindow)ui.get_object("directory_scrolledwindow");
+        var scroll = ui.get_object("directory_scrolledwindow") as Gtk.ScrolledWindow;
         scroll.add(dir_tree_view);
 
         key_tree_view = new DConfKeyView();
         key_tree_view.show();
         key_tree_view.get_selection().changed.connect(key_selected_cb);
-        scroll = (Gtk.ScrolledWindow)ui.get_object("key_scrolledwindow");
+        scroll = ui.get_object("key_scrolledwindow") as Gtk.ScrolledWindow;
         scroll.add(key_tree_view);
 
-        key_info_grid = (Gtk.Grid)ui.get_object("key_info_grid");
-        schema_label = (Gtk.Label)ui.get_object("schema_label");
-        summary_label = (Gtk.Label)ui.get_object("summary_label");
-        description_label = (Gtk.Label)ui.get_object("description_label");
-        type_label = (Gtk.Label)ui.get_object("type_label");
-        default_label = (Gtk.Label)ui.get_object("default_label");
-        set_default_action = (Gtk.Action)ui.get_object("set_default_action");
+        key_info_grid = ui.get_object("key_info_grid") as Gtk.Grid;
+        schema_label = ui.get_object("schema_label") as Gtk.Label;
+        summary_label = ui.get_object("summary_label") as Gtk.Label;
+        description_label = ui.get_object("description_label") as Gtk.Label;
+        type_label = ui.get_object("type_label") as Gtk.Label;
+        default_label = ui.get_object("default_label") as Gtk.Label;
+        set_default_action = ui.get_object("set_default_action") as Gtk.Action;
         set_default_action.activate.connect(set_default_cb);
 
-        search_box = (Gtk.Box)ui.get_object("search_box");
-        search_entry = (Gtk.Entry)ui.get_object("search_entry");
-        search_label = (Gtk.Label)ui.get_object("search_label");
+        search_box = ui.get_object("search_box") as Gtk.Box;
+        search_box.key_press_event.connect ((event) =>
+        {
+            if (event.keyval == Gdk.Key.Escape)
+            {
+                search_box.hide();
+                return true;
+            }
+            return false;
+        });
+        search_entry = ui.get_object("search_entry") as Gtk.Entry;
+        search_label = ui.get_object("search_label") as Gtk.Label;
         search_entry.activate.connect(find_next_cb);
-        var search_box_close_button = (Gtk.Button)ui.get_object("search_box_close_button");
-        search_box_close_button.clicked.connect(close_search_cb);
+        var search_box_close_button = ui.get_object("search_box_close_button") as Gtk.Button;
+        search_box_close_button.clicked.connect(() =>
+        {
+            search_box.hide();
+        });
 
-        var search_next_button = (Gtk.Button)ui.get_object("search_next_button");
+        var search_next_button = ui.get_object("search_next_button") as Gtk.Button;
         search_next_button.clicked.connect(find_next_cb);
 
         /* Always select something */
         Gtk.TreeIter iter;
         if (model.get_iter_first(out iter))
             dir_tree_view.get_selection().select_iter(iter);
-    }
-    
-    private void close_search_cb ()
-    {
-        search_box.hide();
     }
 
     protected override void activate()
@@ -165,7 +171,6 @@ class ConfigurationEditor : Gtk.Application
         case "u":
         case "x":
         case "t":
-        case "d":
             Variant min, max;
             if (key.schema.range != null)
             {
@@ -178,6 +183,19 @@ class ConfigurationEditor : Gtk.Application
                 max = key.get_max();
             }
             return _("Integer [%s..%s]").printf(min.print(false), max.print(false));
+        case "d":
+            Variant min, max;
+            if (key.schema.range != null)
+            {
+                min = key.schema.range.min;
+                max = key.schema.range.max;
+            }
+            else
+            {
+                min = key.get_min();
+                max = key.get_max();
+            }
+            return _("Double [%s..%s]").printf(min.print(false), max.print(false));
         case "b":
             return _("Boolean");
         case "s":

@@ -1,3 +1,203 @@
+Changes in dconf 0.22.0
+========================
+
+ - fix handling of floating point keys in editor
+
+ - update appdata for renamed desktop file
+
+ - minor doap changes
+
+Translations:
+   French
+   Indonesian
+   Lithuanian
+   Hungarian
+   Catalan (Valencian)
+   Korean
+   Traditional Chinese
+   Spanish
+   Brazilian Portuguese
+   Galician translations
+   Catalan
+   Basque language
+   Danish
+   Norwegian bokmål
+   Greek
+   Czech
+   Slovenian
+   Swedish
+   Polish
+   Latvian
+   Hebrew
+   Russian
+   German
+   Assamese
+   Serbian
+
+Changes in dconf 0.21.0
+========================
+
+ - editor desktop file renamed to ca.desrt.dconf-editor to take advantage of
+   D-Bus activation
+
+ - prevent the service from being released more than once if we receive
+   multiple signals (which caused a hang)
+
+Translations:
+  Indonesian
+  Greek
+  Swedish
+
+Changes in dconf 0.20.0
+========================
+
+Czech translation updated.
+
+Changes in dconf 0.19.92
+=========================
+
+ - depend on automake 1.11.2
+
+ - stop using ACLOCAL_FLAGS
+
+ - depend on released version of Vala (0.18.0)
+
+Changes in dconf 0.19.91
+=========================
+
+ - fix an unlikely failure in the fuzz testing of gvdb
+
+ - fix a thread safety issue with file-db
+
+Changes in dconf 0.19.90
+=========================
+
+ - dconf compile: always write little endian
+
+ - file-db: don't install match rules on no bus (fixes gdbus assertion)
+
+ - update dconf(1) manpage for 'dconf compile'
+
+ - fix 'make clean' on FreeBSD
+
+ - editor: provide appdata
+
+Translations updates:
+  Ukrainian translation
+  Aragonese translation
+  Chinese
+
+Changes in dconf 0.19.3
+========================
+
+ - quite a lot of test coverage improvements
+
+ - Add a proper DCONF_ERROR error domain
+
+ - suppress GLib deprecation warnings during build
+
+ - engine: issue warnings about missing files only once per source
+
+ - engine: grok the WritabilityNotify signal from D-Bus
+
+ - gsettings: handle writability changes correctly
+
+ - engine: assorted fixes for issues found during testing
+
+ - portability: only link to -ldl if it is required
+
+ - add support for 'file-db' to profiles: this is an absolute path to a
+   immutable dconf database file
+
+ - add support for finding profiles in XDG_DATA_DIRS if they are not in
+   /etc
+
+ - add 'dconf compile' command for building dconf databases from
+   keyfiles in arbitrary locations (like from the build system of a
+   project that may want to install a file-db)
+
+ - editor: add a section separator to the app menu for consistency
+
+Changes in dconf 0.19.2
+========================
+
+ - Add support for the new GSettingsBackend.read_user_value() API
+
+ - bump GLib version depend accordingly (2.39.1)
+
+Translations updates:
+ Greek
+ Catalan (Valencian)
+ Simplified Chinese
+ Persian
+
+Changes in dconf 0.18.0
+========================
+
+Translations updates:
+ Basque
+ Danish
+ Japanese
+ Korean
+ Portuguese
+ Punjabi
+
+Changes in dconf 0.17.1
+========================
+
+Documentation updates, including better coverage of profiles.
+
+Translations updates:
+ Assamese
+ Belarusian
+ Catalan
+ Dutch
+ Estonian
+ Finnish
+ French
+ German
+ Hungarian
+ Indonesian
+ Italian
+ Korean
+ Latvian
+ Polish
+ Russian
+ Serbian
+ Tajik
+ Thai
+ Traditional Chinese
+
+Changes in dconf 0.17.0
+========================
+
+Fix a semi-serious thread safety issue:
+
+  https://bugzilla.gnome.org/show_bug.cgi?id=703073
+
+Some improvements to the editor:
+
+ - fix some compile warnings
+ - use gresource
+ - cancel searches on escape
+
+Translation updates:
+ Brazilian Portuguese
+ Czech
+ Esperanto
+ Friulian
+ Galician
+ German
+ Hebrew
+ Indonesian
+ Lithuanian
+ Malayalam
+ Norwegian bokmål
+ Slovak
+ Slovenian
+ Spanish
+ Tajik
+
 Changes in dconf 0.16.0
 ========================
 

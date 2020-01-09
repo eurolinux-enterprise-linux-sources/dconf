@@ -13,12 +13,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "dconf-writer.h"
 
@@ -223,14 +223,14 @@ dconf_writer_real_end (DConfWriter *writer)
   g_clear_pointer (&writer->priv->uncommited_values, dconf_changeset_unref);
 }
 
-gboolean
+static gboolean
 dconf_writer_begin (DConfWriter  *writer,
                     GError      **error)
 {
   return DCONF_WRITER_GET_CLASS (writer)->begin (writer, error);
 }
 
-void
+static void
 dconf_writer_change (DConfWriter    *writer,
                      DConfChangeset *changeset,
                      const gchar    *tag)
@@ -238,14 +238,14 @@ dconf_writer_change (DConfWriter    *writer,
   DCONF_WRITER_GET_CLASS (writer)->change (writer, changeset, tag);
 }
 
-gboolean
+static gboolean
 dconf_writer_commit (DConfWriter  *writer,
                      GError      **error)
 {
   return DCONF_WRITER_GET_CLASS (writer)->commit (writer, error);
 }
 
-void
+static void
 dconf_writer_end (DConfWriter *writer)
 {
   return DCONF_WRITER_GET_CLASS (writer)->end (writer);
@@ -260,7 +260,8 @@ dconf_writer_handle_init (DConfDBusWriter       *dbus_writer,
 
   dconf_blame_record (invocation);
 
-  dconf_writer_begin (writer, &error) && dconf_writer_commit (writer, &error);
+  if (dconf_writer_begin (writer, &error))
+    dconf_writer_commit (writer, &error);
 
   if (error)
     {

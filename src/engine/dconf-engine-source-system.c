@@ -13,12 +13,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "dconf-engine-source-private.h"
 
@@ -43,7 +43,6 @@ dconf_engine_source_system_needs_reopen (DConfEngineSource *source)
 static GvdbTable *
 dconf_engine_source_system_reopen (DConfEngineSource *source)
 {
-  static gboolean did_warn;
   GError *error = NULL;
   GvdbTable *table;
   gchar *filename;
@@ -53,10 +52,10 @@ dconf_engine_source_system_reopen (DConfEngineSource *source)
 
   if (table == NULL)
     {
-      if (!did_warn)
+      if (!source->did_warn)
         {
-          g_critical ("unable to open file '%s': %s; expect degraded performance", filename, error->message);
-          did_warn = TRUE;
+          g_warning ("unable to open file '%s': %s; expect degraded performance", filename, error->message);
+          source->did_warn = TRUE;
         }
 
       g_error_free (error);

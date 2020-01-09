@@ -13,12 +13,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "../engine/dconf-engine.h"
 
@@ -67,6 +67,7 @@ typedef struct
   const gchar           *interface_name;
   const gchar           *method_name;
   GVariant              *parameters;
+  const GVariantType    *expected_type;
   DConfEngineCallHandle *handle;
 } DConfGDBusCall;
 
@@ -243,7 +244,7 @@ dconf_gdbus_method_call (gpointer user_data)
 
   if (connection)
     g_dbus_connection_call (connection, call->bus_name, call->object_path, call->interface_name,
-                            call->method_name, call->parameters, NULL, G_DBUS_CALL_FLAGS_NONE,
+                            call->method_name, call->parameters, call->expected_type, G_DBUS_CALL_FLAGS_NONE,
                             -1, NULL, dconf_gdbus_method_call_done, call->handle);
 
   else
@@ -275,6 +276,7 @@ dconf_engine_dbus_call_async_func (GBusType                bus_type,
   call->interface_name = interface_name;
   call->method_name = method_name;
   call->parameters = g_variant_ref_sink (parameters);
+  call->expected_type = dconf_engine_call_handle_get_expected_type (handle);
   call->handle = handle;
 
   source = g_idle_source_new ();

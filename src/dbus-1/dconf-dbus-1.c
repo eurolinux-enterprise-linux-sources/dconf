@@ -17,6 +17,8 @@
  * Author: Ryan Lortie <desrt@desrt.ca>
  **/
 
+#include "config.h"
+
 #include "dconf-dbus-1.h"
 
 #include "../engine/dconf-engine.h"
@@ -43,6 +45,7 @@ dconf_engine_change_notify (DConfEngine         *engine,
                             const gchar         *prefix,
                             const gchar * const *changes,
                             const gchar         *tag,
+                            gboolean             is_writability,
                             gpointer             origin_tag,
                             gpointer             user_data)
 {
@@ -158,7 +161,7 @@ dconf_dbus_client_new (const gchar    *profile,
   dconf_libdbus_1_provide_bus (G_BUS_TYPE_SYSTEM, system);
 
   dcdbc = g_slice_new (DConfDBusClient);
-  dcdbc->engine = dconf_engine_new (dcdbc, NULL);
+  dcdbc->engine = dconf_engine_new (NULL, dcdbc, NULL);
   dcdbc->watches = NULL;
   dcdbc->ref_count = 1;
 

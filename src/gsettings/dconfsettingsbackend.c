@@ -12,12 +12,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #define G_SETTINGS_ENABLE_BACKEND
 #include <gio/gsettingsbackend.h>
@@ -61,6 +61,16 @@ dconf_settings_backend_read (GSettingsBackend   *backend,
     value = dconf_engine_read (dcsb->engine, NULL, key);
 
   return value;
+}
+
+static GVariant *
+dconf_settings_backend_read_user_value (GSettingsBackend   *backend,
+                                        const gchar        *key,
+                                        const GVariantType *expected_type)
+{
+  DConfSettingsBackend *dcsb = (DConfSettingsBackend *) backend;
+
+  return dconf_engine_read_user_value (dcsb->engine, NULL, key);
 }
 
 static gboolean
@@ -171,7 +181,7 @@ dconf_settings_backend_init (DConfSettingsBackend *dcsb)
 
   weak_ref = g_slice_new (GWeakRef);
   g_weak_ref_init (weak_ref, dcsb);
-  dcsb->engine = dconf_engine_new (weak_ref, dconf_settings_backend_free_weak_ref);
+  dcsb->engine = dconf_engine_new (NULL, weak_ref, dconf_settings_backend_free_weak_ref);
 }
 
 static void
@@ -193,6 +203,7 @@ dconf_settings_backend_class_init (GSettingsBackendClass *class)
   object_class->finalize = dconf_settings_backend_finalize;
 
   class->read = dconf_settings_backend_read;
+  class->read_user_value = dconf_settings_backend_read_user_value;
   class->write = dconf_settings_backend_write;
   class->write_tree = dconf_settings_backend_write_tree;
   class->reset = dconf_settings_backend_reset;
@@ -228,6 +239,7 @@ dconf_engine_change_notify (DConfEngine         *engine,
                             const gchar         *prefix,
                             const gchar * const *changes,
                             const gchar         *tag,
+                            gboolean             is_writability,
                             gpointer             origin_tag,
                             gpointer             user_data)
 {
@@ -242,6 +254,21 @@ dconf_engine_change_notify (DConfEngine         *engine,
   if (changes[0] == NULL)
     return;
 
+  if (is_writability)
+    {
+      /* We know that the engine does it this way... */
+      g_assert (changes[0][0] == '\0' && changes[1] == NULL);
+
+      if (g_str_has_suffix (prefix, "/"))
+        g_settings_backend_path_writable_changed (G_SETTINGS_BACKEND (dcsb), prefix);
+      else
+        g_settings_backend_writable_changed (G_SETTINGS_BACKEND (dcsb), prefix);
+    }
+
+  /* We send the normal change notification even in the event that this
+   * was a writability notification because adding/removing a lock could
+   * impact the value that gets read.
+   */
   if (changes[1] == NULL)
     {
       if (g_str_has_suffix (prefix, "/"))

@@ -13,12 +13,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "dconf-engine-source-private.h"
 
@@ -103,6 +103,10 @@ dconf_engine_source_new (const gchar *description)
   /* ...or "system-db" */
   else if ((colon == description + 9) && memcmp (description, "system-db", 9) == 0)
     vtable = &dconf_engine_source_system_vtable;
+
+  /* ...or "file-db" */
+  else if ((colon == description + 7) && memcmp (description, "file-db", 7) == 0)
+    vtable = &dconf_engine_source_file_vtable;
 
   /* If it's not any of those, we have failed. */
   else

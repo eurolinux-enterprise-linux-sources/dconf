@@ -12,12 +12,12 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
+
+#include "config.h"
 
 #include "dconf-service.h"
 
@@ -39,6 +39,8 @@ typedef struct
   DConfBlame  *blame;
   GHashTable  *writers;
   GArray      *subtree_ids;
+
+  gboolean     released;
 } DConfService;
 
 G_DEFINE_TYPE (DConfService, dconf_service, G_TYPE_APPLICATION)
@@ -48,7 +50,10 @@ dconf_service_signalled (gpointer user_data)
 {
   DConfService *service = user_data;
 
-  g_application_release (G_APPLICATION (service));
+  if (!service->released)
+    g_application_release (G_APPLICATION (service));
+
+  service->released = TRUE;
 
   return G_SOURCE_REMOVE;
 }
@@ -144,7 +149,7 @@ dconf_service_subtree_enumerate (GDBusConnection *connection,
   return string_set_free (set);
 }
 
-GDBusInterfaceInfo **
+static GDBusInterfaceInfo **
 dconf_service_subtree_introspect (GDBusConnection *connection,
                                   const gchar     *sender,
                                   const gchar     *object_path,
@@ -193,7 +198,7 @@ dconf_service_get_writer (DConfService    *service,
   return writer;
 }
 
-const GDBusInterfaceVTable *
+static const GDBusInterfaceVTable *
 dconf_service_subtree_dispatch (GDBusConnection *connection,
                                 const gchar     *sender,
                                 const gchar     *object_path,

@@ -1,4 +1,12 @@
 <SECTION>
+<FILE>error</FILE>
+DConfError
+DCONF_ERROR
+<SUBSECTION Standard>
+dconf_error_quark
+</SECTION>
+
+<SECTION>
 <FILE>client</FILE>
 DConfClient
 dconf_client_new
@@ -51,4 +59,5 @@ dconf_changeset_ref
 dconf_changeset_serialise
 dconf_changeset_set
 dconf_changeset_unref
+dconf_changeset_seal
 </SECTION>

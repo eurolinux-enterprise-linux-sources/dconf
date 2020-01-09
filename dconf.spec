@@ -1,21 +1,16 @@
-%define glib2_version 2.27.2
-%define vala_version 0.11.7
+%define glib2_version 2.39.1
+%define vala_version 0.18.0
 
 Name:           dconf
-Version:        0.16.0
-Release:        6%{?dist}
+Version:        0.22.0
+Release:        2%{?dist}
 Summary:        A configuration system
 
 Group:          System Environment/Base
 License:        LGPLv2+ and GPLv2+ and GPLv3+
 URL:            http://live.gnome.org/dconf
 #VCS:           git:git://git.gnome.org/dconf
-Source0:        http://download.gnome.org/sources/dconf/0.16/dconf-%{version}.tar.xz
-
-# upstream fixes
-Patch0:         0001-DConfChangeset-expose-concept-of-sealing.patch
-Patch1:         0002-engine-seal-changesets-on-changes.patch
-Patch2:         dconf-shutdown-hang.patch
+Source0:        http://download.gnome.org/sources/dconf/0.22/dconf-%{version}.tar.xz
 
 BuildRequires:  glib2-devel >= %{glib2_version}
 BuildRequires:  gtk3-devel
@@ -26,6 +21,7 @@ BuildRequires:  gtk-doc
 BuildRequires:  intltool
 
 Requires:       dbus
+Requires:       glib2%{?_isa} >= %{glib2_version}
 
 %description
 dconf is a low-level configuration system. Its main purpose is to provide a
@@ -51,13 +47,10 @@ dconf-editor allows you to browse and modify dconf databases.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
 
 %build
 %configure --disable-static
-make %{?_smp_mflags}
+make V=1 %{?_smp_mflags}
 
 
 %install
@@ -100,6 +93,8 @@ done
 
 %postun editor
 if [ $1 -eq 0 ] ; then
+  glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
+
   for d in hicolor HighContrast ; do
     touch --no-create %{_datadir}/icons/$d &>/dev/null || :
     gtk-update-icon-cache %{_datadir}/icons/$d &>/dev/null || :
@@ -107,6 +102,8 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %posttrans editor
+glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
+
 for d in hicolor HighContrast ; do
   gtk-update-icon-cache %{_datadir}/icons/$d &>/dev/null || :
 done
@@ -114,6 +111,9 @@ done
 
 %files -f dconf.lang
 %doc COPYING
+%dir %{_sysconfdir}/dconf
+%dir %{_sysconfdir}/dconf/db
+%dir %{_sysconfdir}/dconf/profile
 %{_libdir}/gio/modules/libdconfsettings.so
 %{_libexecdir}/dconf-service
 %{_datadir}/dbus-1/services/ca.desrt.dconf.service
@@ -121,7 +121,6 @@ done
 %{_libdir}/libdconf.so.*
 %{_libdir}/libdconf-dbus-1.so.*
 %{_datadir}/bash-completion/completions/dconf
-%{_datadir}/glib-2.0/schemas/ca.desrt.dconf-editor.gschema.xml
 %{_mandir}/man1/dconf-service.1.gz
 %{_mandir}/man1/dconf.1.gz
 %{_mandir}/man7/dconf.7.gz
@@ -148,15 +147,23 @@ done
 
 %files editor
 %{_bindir}/dconf-editor
-%{_datadir}/applications/dconf-editor.desktop
-%dir %{_datadir}/dconf-editor
-%{_datadir}/dconf-editor/dconf-editor.ui
-%{_datadir}/dconf-editor/dconf-editor-menu.ui
+%{_datadir}/appdata/ca.desrt.dconf-editor.appdata.xml
+%{_datadir}/applications/ca.desrt.dconf-editor.desktop
+%{_datadir}/dbus-1/services/ca.desrt.dconf-editor.service
+%{_datadir}/glib-2.0/schemas/ca.desrt.dconf-editor.gschema.xml
 %{_datadir}/icons/hicolor/*/apps/dconf-editor.png
 %{_datadir}/icons/HighContrast/*/apps/dconf-editor.png
 %{_mandir}/man1/dconf-editor.1.gz
 
 %changelog
+* Tue Mar 24 2015 Marek Kasik <mkasik@redhat.com> - 0.22.0-2
+- Remove unused patches
+- Resolves: #1174448
+
+* Fri Sep 19 2014 Kalev Lember <kalevlember@gmail.com> - 0.22.0-1
+- Update to 0.22.0
+- Resolves: #1174448
+
 * Fri Apr  4 2014 Marek Kasik <mkasik@redhat.com> - 0.16.0-6
 - Don't hang shutdown
 - Resolves: #1082994

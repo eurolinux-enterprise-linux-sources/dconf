@@ -54,6 +54,12 @@
     </cmdsynopsis>
     <cmdsynopsis>
       <command>dconf</command>
+      <arg choice="plain">compile</arg>
+      <arg choice="plain"><replaceable>OUTPUT</replaceable></arg>
+      <arg choice="plain"><replaceable>KEYFILEDIR</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>dconf</command>
       <arg choice="plain">update</arg>
     </cmdsynopsis>
     <cmdsynopsis>
@@ -83,10 +89,10 @@
 
     <para>
       The <command>dconf</command> program can perform various operations on a dconf database, such as reading
-      or writing individual values or entire directories. This tool operates directly on the dconf database and
-      does not read gsettings schema information. Therefore, it cannot perform type and consistency checks on
-      values. The <citerefentry><refentrytitle>gsettings</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-      utility is an alternative if such checks are needed.
+      or writing individual values or entire directories. This tool operates on dconf directly, without using
+      gsettings schema information. Therefore, it cannot perform type and consistency checks on values.  The
+      <citerefentry><refentrytitle>gsettings</refentrytitle><manvolnum>1</manvolnum></citerefentry> utility is
+      an alternative if such checks are needed.
     </para>
 
     <para>
@@ -96,8 +102,17 @@
     </para>
 
     <para>
+      The <replaceable>OUTPUT</replaceable> argument must the location to write a (binary) dconf database to and the
+      <replaceable>KEYFILEDIR</replaceable> argument must be a .d directory containing keyfiles.
+    </para>
+
+    <para>
       <replaceable>VALUE</replaceable> arguments must be in GVariant format, so e.g. a string must include
       explicit quotes: "'foo'". This format is also used when printing out values.
+    </para>
+
+    <para>
+      Note that dconf needs a D-Bus session bus connection to write changes to the dconf database.
     </para>
   </refsect1>
 
@@ -131,6 +146,18 @@
       </varlistentry>
 
       <varlistentry>
+        <term><option>compile</option></term>
+
+        <listitem>
+          <para>Compile a binary database from keyfiles.</para>
+          <para>
+            The result is always in little-endian byte order, so it can be safely installed in 'share'.  If it
+            is used on a big endian machine, dconf will automatically byteswap the contents on read.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term><option>update</option></term>
 
         <listitem><para>Update the system dconf databases.</para></listitem>
@@ -160,6 +187,20 @@
         <listitem><para>Display help and exit.  If <replaceable>COMMAND</replaceable> is given, display help for this command.</para></listitem>
       </varlistentry>
 
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>Environment</title>
+
+    <variablelist>
+      <varlistentry>
+        <term><envar>DCONF_PROFILE</envar></term>
+        <listitem><para>
+          This environment variable determines which dconf <firstterm>profile</firstterm> to use. See
+          <citerefentry><refentrytitle>dconf</refentrytitle><manvolnum>7</manvolnum></citerefentry>.
+        </para></listitem>
+      </varlistentry>
     </variablelist>
   </refsect1>
 

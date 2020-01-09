@@ -12,16 +12,18 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
 
+#include "config.h"
+
 #define _XOPEN_SOURCE 600
 #include "dconf-engine.h"
 
+#include "../common/dconf-error.h"
+#include "../common/dconf-paths.h"
 #include "../gvdb/gvdb-reader.h"
 #include <string.h>
 #include <stdlib.h>
@@ -221,8 +223,9 @@ dconf_engine_unlock_queues (DConfEngine *engine)
 }
 
 DConfEngine *
-dconf_engine_new (gpointer       user_data,
-                  GDestroyNotify free_func)
+dconf_engine_new (const gchar    *profile,
+                  gpointer        user_data,
+                  GDestroyNotify  free_func)
 {
   DConfEngine *engine;
 
@@ -235,7 +238,7 @@ dconf_engine_new (gpointer       user_data,
   g_mutex_init (&engine->queue_lock);
   g_cond_init (&engine->queue_cond);
 
-  engine->sources = dconf_engine_profile_open (NULL, &engine->n_sources);
+  engine->sources = dconf_engine_profile_open (profile, &engine->n_sources);
 
   g_mutex_lock (&dconf_engine_global_lock);
   dconf_engine_global_list = g_slist_prepend (dconf_engine_global_list, engine);
@@ -546,6 +549,53 @@ dconf_engine_read (DConfEngine *engine,
   return value;
 }
 
+GVariant *
+dconf_engine_read_user_value (DConfEngine *engine,
+                              GQueue      *read_through,
+                              const gchar *key)
+{
+  gboolean found_key = FALSE;
+  GVariant *value = NULL;
+
+  /* This is a simplified version of the above.  We get to ignore locks
+   * and system-level settings.
+   *
+   * NB: we may find "NULL", which is why we have a separate variable.
+   */
+
+  /* Ignore the queues if we don't have a writable database */
+  if (engine->n_sources == 0 || !engine->sources[0]->writable)
+    return NULL;
+
+  dconf_engine_acquire_sources (engine);
+
+  /* First check read-through */
+  if (read_through)
+    found_key = dconf_engine_find_key_in_queue (read_through, key, &value);
+
+  /* Next pending/in-flight */
+  if (!found_key)
+    {
+      dconf_engine_lock_queues (engine);
+
+      /* Check the pending queue first because those were submitted
+       * more recently.
+       */
+      found_key = dconf_engine_find_key_in_queue (&engine->pending, key, &value) ||
+                  dconf_engine_find_key_in_queue (&engine->in_flight, key, &value);
+
+      dconf_engine_unlock_queues (engine);
+    }
+
+  /* Finally, check the user database */
+  if (!found_key && engine->sources[0]->values)
+    value = gvdb_table_get_value (engine->sources[0]->values, key);
+
+  dconf_engine_release_sources (engine);
+
+  return value;
+}
+
 gchar **
 dconf_engine_list (DConfEngine *engine,
                    const gchar *dir,
@@ -657,7 +707,10 @@ dconf_engine_call_handle_new (DConfEngine                   *engine,
 const GVariantType *
 dconf_engine_call_handle_get_expected_type (DConfEngineCallHandle *handle)
 {
-  return handle->expected_reply;
+  if (handle)
+    return handle->expected_reply;
+  else
+    return NULL;
 }
 
 void
@@ -732,7 +785,7 @@ dconf_engine_watch_established (DConfEngine  *engine,
        * We don't know what changed, so we can just say that potentially
        * everything changed.  This case is very rare, anyway...
        */
-      dconf_engine_change_notify (engine, "/", changes, NULL, NULL, engine->user_data);
+      dconf_engine_change_notify (engine, "/", changes, NULL, FALSE, NULL, engine->user_data);
     }
 
   dconf_engine_call_handle_free (handle);
@@ -760,13 +813,20 @@ dconf_engine_watch_fast (DConfEngine *engine,
   ow = dconf_engine_call_handle_new (engine, dconf_engine_watch_established,
                                      G_VARIANT_TYPE_UNIT, sizeof (OutstandingWatch));
   ow->state = dconf_engine_get_state (engine);
-  ow->pending = engine->n_sources;
+
+  /* We start getting async calls returned as soon as we start dispatching them,
+   * so we must not touch the 'ow' struct after we send the first one.
+   */
+  for (i = 0; i < engine->n_sources; i++)
+    if (engine->sources[i]->bus_type)
+      ow->pending++;
 
   for (i = 0; i < engine->n_sources; i++)
-    dconf_engine_dbus_call_async_func (engine->sources[i]->bus_type, "org.freedesktop.DBus",
-                                       "/org/freedesktop/DBus", "org.freedesktop.DBus", "AddMatch",
-                                       dconf_engine_make_match_rule (engine->sources[i], path),
-                                       &ow->handle, NULL);
+    if (engine->sources[i]->bus_type)
+      dconf_engine_dbus_call_async_func (engine->sources[i]->bus_type, "org.freedesktop.DBus",
+                                         "/org/freedesktop/DBus", "org.freedesktop.DBus", "AddMatch",
+                                         dconf_engine_make_match_rule (engine->sources[i], path),
+                                         &ow->handle, NULL);
 }
 
 void
@@ -776,9 +836,10 @@ dconf_engine_unwatch_fast (DConfEngine *engine,
   gint i;
 
   for (i = 0; i < engine->n_sources; i++)
-    dconf_engine_dbus_call_async_func (engine->sources[i]->bus_type, "org.freedesktop.DBus",
-                                       "/org/freedesktop/DBus", "org.freedesktop.DBus", "RemoveMatch",
-                                       dconf_engine_make_match_rule (engine->sources[i], path), NULL, NULL);
+    if (engine->sources[i]->bus_type)
+      dconf_engine_dbus_call_async_func (engine->sources[i]->bus_type, "org.freedesktop.DBus",
+                                         "/org/freedesktop/DBus", "org.freedesktop.DBus", "RemoveMatch",
+                                         dconf_engine_make_match_rule (engine->sources[i], path), NULL, NULL);
 }
 
 static void
@@ -798,6 +859,9 @@ dconf_engine_handle_match_rule_sync (DConfEngine *engine,
   for (i = 0; i < engine->n_sources; i++)
     {
       GVariant *result;
+
+      if (!engine->sources[i]->bus_type)
+        continue;
 
       result = dconf_engine_dbus_call_sync_func (engine->sources[i]->bus_type, "org.freedesktop.DBus",
                                                  "/org/freedesktop/DBus", "org.freedesktop.DBus", method_name,
@@ -868,7 +932,7 @@ dconf_engine_emit_changes (DConfEngine    *engine,
   const gchar * const *changes;
 
   if (dconf_changeset_describe (changeset, &prefix, &changes, NULL))
-    dconf_engine_change_notify (engine, prefix, changes, NULL, origin_tag, engine->user_data);
+    dconf_engine_change_notify (engine, prefix, changes, NULL, FALSE, origin_tag, engine->user_data);
 }
 
 static void
@@ -1035,6 +1099,8 @@ dconf_engine_change_fast (DConfEngine     *engine,
   if (!dconf_engine_changeset_changes_only_writable_keys (engine, changeset, error))
     return FALSE;
 
+  dconf_changeset_seal (changeset);
+
   /* Check for duplicates in the pending queue.
    *
    * Note: order doesn't really matter here since "similarity" is an
@@ -1105,6 +1171,8 @@ dconf_engine_change_sync (DConfEngine     *engine,
   if (!dconf_engine_changeset_changes_only_writable_keys (engine, changeset, error))
     return FALSE;
 
+  dconf_changeset_seal (changeset);
+
   /* we know that we have at least one source because we checked writability */
   reply = dconf_engine_dbus_call_sync_func (engine->sources[0]->bus_type,
                                             engine->sources[0]->bus_name,
@@ -1123,10 +1191,29 @@ dconf_engine_change_sync (DConfEngine     *engine,
   return TRUE;
 }
 
+static gboolean
+dconf_engine_is_interested_in_signal (DConfEngine *engine,
+                                      GBusType     bus_type,
+                                      const gchar *sender,
+                                      const gchar *path)
+{
+  gint i;
+
+  for (i = 0; i < engine->n_sources; i++)
+    {
+      DConfEngineSource *source = engine->sources[i];
+
+      if (source->bus_type == bus_type && g_str_equal (source->object_path, path))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 void
 dconf_engine_handle_dbus_signal (GBusType     type,
                                  const gchar *sender,
-                                 const gchar *path,
+                                 const gchar *object_path,
                                  const gchar *member,
                                  GVariant    *body)
 {
@@ -1141,6 +1228,36 @@ dconf_engine_handle_dbus_signal (GBusType     type,
         return;
 
       g_variant_get (body, "(&s^a&s&s)", &prefix, &changes, &tag);
+
+      /* Reject junk */
+      if (changes[0] == NULL)
+        /* No changes?  Do nothing. */
+        goto junk;
+
+      if (dconf_is_key (prefix, NULL))
+        {
+          /* If the prefix is a key then the changes must be ['']. */
+          if (changes[0][0] || changes[1])
+            goto junk;
+        }
+      else if (dconf_is_dir (prefix, NULL))
+        {
+          /* If the prefix is a dir then we can have changes within that
+           * dir, but they must be rel paths.
+           *
+           *   ie:
+           *
+           *  ('/a/', ['b', 'c/']) == ['/a/b', '/a/c/']
+           */
+          gint i;
+
+          for (i = 0; changes[i]; i++)
+            if (!dconf_is_rel_path (changes[i], NULL))
+              goto junk;
+        }
+      else
+        /* Not a key or a dir? */
+        goto junk;
 
       g_mutex_lock (&dconf_engine_global_lock);
       engines = g_slist_copy_deep (dconf_engine_global_list, (GCopyFunc) dconf_engine_ref, NULL);
@@ -1157,22 +1274,48 @@ dconf_engine_handle_dbus_signal (GBusType     type,
            * Check last_handled to determine if we should ignore it.
            */
           if (!engine->last_handled || !g_str_equal (engine->last_handled, tag))
-            dconf_engine_change_notify (engine, prefix, changes, tag, NULL, engine->user_data);
+            if (dconf_engine_is_interested_in_signal (engine, type, sender, object_path))
+              dconf_engine_change_notify (engine, prefix, changes, tag, FALSE, NULL, engine->user_data);
 
           engines = g_slist_delete_link (engines, engines);
 
           dconf_engine_unref (engine);
         }
 
+junk:
       g_free (changes);
     }
 
   else if (g_str_equal (member, "WritabilityNotify"))
     {
+      const gchar *empty_str_list[] = { "", NULL };
+      const gchar *path;
+      GSList *engines;
+
       if (!g_variant_is_of_type (body, G_VARIANT_TYPE ("(s)")))
         return;
 
-      g_warning ("Need to handle writability changes"); /* XXX */
+      g_variant_get (body, "(&s)", &path);
+
+      /* Rejecting junk here is relatively straightforward */
+      if (!dconf_is_path (path, NULL))
+        return;
+
+      g_mutex_lock (&dconf_engine_global_lock);
+      engines = g_slist_copy_deep (dconf_engine_global_list, (GCopyFunc) dconf_engine_ref, NULL);
+      g_mutex_unlock (&dconf_engine_global_lock);
+
+      while (engines)
+        {
+          DConfEngine *engine = engines->data;
+
+          if (dconf_engine_is_interested_in_signal (engine, type, sender, object_path))
+            dconf_engine_change_notify (engine, path, empty_str_list, "", TRUE, NULL, engine->user_data);
+
+          engines = g_slist_delete_link (engines, engines);
+
+          dconf_engine_unref (engine);
+        }
     }
 }
 

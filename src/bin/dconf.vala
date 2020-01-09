@@ -13,9 +13,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
@@ -31,27 +29,32 @@ void show_help (bool requested, string? command) {
 
 		case "help":
 			description = "Print help";
-			synopsis = "COMMAND";
+			synopsis = " COMMAND ";
 			break;
 
 		case "read":
 			description = "Read the value of a key";
-			synopsis = "KEY";
+			synopsis = " KEY ";
 			break;
 
 		case "list":
 			description = "List the sub-keys and sub-dirs of a dir";
-			synopsis = "DIR";
+			synopsis = " DIR ";
 			break;
 
 		case "write":
 			description = "Write a new value to a key";
-			synopsis = "KEY VALUE";
+			synopsis = " KEY VALUE ";
 			break;
 
 		case "reset":
 			description = "Reset a key or dir.  -f is required for dirs.";
-			synopsis = "[-f] PATH";
+			synopsis = " [-f] PATH ";
+			break;
+
+		case "compile":
+			description = "Compile a binary database from keyfiles";
+			synopsis = " OUTPUT KEYFILEDIR ";
 			break;
 
 		case "update":
@@ -91,6 +94,7 @@ Commands:
   list              List the contents of a dir
   write             Change the value of a key
   reset             Reset the value of a key or dir
+  compile           Compile a binary database from keyfiles
   update            Update the system databases
   watch             Watch a path for changes
   dump              Dump an entire subpath to stdout
@@ -101,30 +105,38 @@ Use 'dconf help COMMAND' to get detailed help.
 """);
 	} else {
 		str.append ("Usage:\n");
-		str.append_printf ("  dconf %s %s\n\n", command, synopsis);
+		str.append_printf ("  dconf %s%s\n\n", command, synopsis);
 		str.append_printf ("%s\n\n", description);
 
 		if (synopsis != "") {
 			str.append ("Arguments:\n");
 
-			if ("COMMAND" in synopsis) {
-				str.append ("  COMMAND   The (optional) command to explain\n");
+			if (" COMMAND " in synopsis) {
+				str.append ("  COMMAND     The (optional) command to explain\n");
 			}
 
-			if ("PATH" in synopsis) {
-				str.append ("  PATH      Either a KEY or DIR\n");
+			if (" PATH " in synopsis) {
+				str.append ("  PATH        Either a KEY or DIR\n");
 			}
 
-			if ("PATH" in synopsis || "KEY" in synopsis) {
-				str.append ("  KEY       A key path (starting, but not ending with '/')\n");
+			if (" PATH " in synopsis || " KEY " in synopsis) {
+				str.append ("  KEY         A key path (starting, but not ending with '/')\n");
 			}
 
-			if ("PATH" in synopsis || "DIR" in synopsis) {
-				str.append ("  DIR       A directory path (starting and ending with '/')\n");
+			if (" PATH " in synopsis || " DIR " in synopsis) {
+				str.append ("  DIR         A directory path (starting and ending with '/')\n");
 			}
 
-			if ("VALUE" in synopsis) {
-				str.append ("  VALUE     The value to write (in GVariant format)\n");
+			if (" VALUE " in synopsis) {
+				str.append ("  VALUE       The value to write (in GVariant format)\n");
+			}
+
+			if (" OUTPUT " in synopsis) {
+				str.append ("  OUTPUT      The filename of the (binary) output\n");
+			}
+
+			if (" KEYFILEDIR " in synopsis) {
+				str.append ("  KEYFILEDIR  The path to the .d directory containing keyfiles\n");
 			}
 		}
 
@@ -287,6 +299,7 @@ int main (string[] args) {
 		CommandMapping ("list",      dconf_list),
 		CommandMapping ("write",     dconf_write),
 		CommandMapping ("reset",     dconf_reset),
+		CommandMapping ("compile",   dconf_compile),
 		CommandMapping ("update",    dconf_update),
 		CommandMapping ("watch",     dconf_watch),
 		CommandMapping ("dump",      dconf_dump),

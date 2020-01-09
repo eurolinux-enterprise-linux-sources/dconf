@@ -12,9 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
@@ -34,6 +32,7 @@ typedef struct _DConfBlame DConfBlame;
 #define DCONF_BLAME_GET_CLASS(inst)                         (G_TYPE_INSTANCE_GET_CLASS ((inst),                      \
                                                              DCONF_TYPE_BLAME, DConfBlameClass))
 
+GType                   dconf_blame_get_type                            (void);
 DConfBlame             *dconf_blame_get                                 (void);
 void                    dconf_blame_record                              (GDBusMethodInvocation *invocation);
 
