@@ -1,0 +1,77 @@
+From 6a6797446f13378035a2700253546b524d629c8a Mon Sep 17 00:00:00 2001
+From: Marek Kasik <mkasik@redhat.com>
+Date: Tue, 10 Jul 2018 18:29:16 +0200
+Subject: [PATCH] Check mtimes of files when updating databases
+
+Do not check just mtimes of directories in /etc/dconf/db/
+but also mtimes of the files in those directories
+to catch all modifications in them.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=708258
+---
+ bin/dconf-update.vala | 41 ++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 34 insertions(+), 7 deletions(-)
+
+diff --git a/bin/dconf-update.vala b/bin/dconf-update.vala
+index d452092..5aac6c7 100644
+--- a/bin/dconf-update.vala
++++ b/bin/dconf-update.vala
+@@ -162,21 +162,48 @@ Gvdb.HashTable read_directory (string dirname) throws GLib.Error {
+ 	return table;
+ }
+ 
++time_t get_directory_mtime (string dirname, Posix.Stat dir_buf) throws GLib.Error {
++	Posix.Stat lockdir_buf;
++	Posix.Stat file_buf;
++	time_t dir_mtime = dir_buf.st_mtime;
++
++	var files = list_directory (dirname, Posix.S_IFREG);
++	files.sort (strcmp);
++	files.reverse ();
++
++	foreach (var filename in files) {
++		if (Posix.stat (filename, out file_buf) == 0 && file_buf.st_mtime > dir_mtime)
++			dir_mtime = file_buf.st_mtime;
++	}
++
++	if (Posix.stat (dirname + "/locks", out lockdir_buf) == 0 && Posix.S_ISDIR (lockdir_buf.st_mode)) {
++		if (lockdir_buf.st_mtime > dir_mtime) {
++			// if the lock directory has been updated more recently then consider its timestamp instead
++			dir_mtime = lockdir_buf.st_mtime;
++		}
++
++		files = list_directory (dirname + "/locks", Posix.S_IFREG);
++		files.sort (strcmp);
++		files.reverse ();
++
++		foreach (var filename in files) {
++			if (Posix.stat (filename, out file_buf) == 0 && file_buf.st_mtime > dir_mtime)
++				dir_mtime = file_buf.st_mtime;
++		}
++	}
++
++	return dir_mtime;
++}
++
+ void maybe_update_from_directory (string dirname) throws GLib.Error {
+ 	Posix.Stat dir_buf;
+ 
+ 	if (Posix.stat (dirname, out dir_buf) == 0 && Posix.S_ISDIR (dir_buf.st_mode)) {
+-		Posix.Stat lockdir_buf;
+ 		Posix.Stat file_buf;
+ 
+ 		var filename = dirname.substring (0, dirname.length - 2);
+ 
+-		if (Posix.stat (dirname + "/locks", out lockdir_buf) == 0 && lockdir_buf.st_mtime > dir_buf.st_mtime) {
+-			// if the lock directory has been updated more recently then consider its timestamp instead
+-			dir_buf.st_mtime = lockdir_buf.st_mtime;
+-		}
+-
+-		if (Posix.stat (filename, out file_buf) == 0 && file_buf.st_mtime > dir_buf.st_mtime) {
++		if (Posix.stat (filename, out file_buf) == 0 && file_buf.st_mtime > get_directory_mtime (dirname, dir_buf)) {
+ 			return;
+ 		}
+ 
+-- 
+2.17.1
+

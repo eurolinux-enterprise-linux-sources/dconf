@@ -3,7 +3,7 @@
 
 Name:           dconf
 Version:        0.26.0
-Release:        2%{?dist}
+Release:        3%{?dist}.1
 Summary:        A configuration system
 
 Group:          System Environment/Base
@@ -18,6 +18,9 @@ Patch1:         dconf-0.26.0-read-flag.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1281253
 Patch2:         dconf-0.26.0-permissions.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1626372
+Patch3:         dconf-0.26.0-db-mtime.patch
 
 BuildRequires:  glib2-devel >= %{glib2_version}
 BuildRequires:  libxml2-devel
@@ -47,6 +50,7 @@ development using dconf.
 %patch0 -p1 -R -b .libdbus
 %patch1 -p1 -b .read-flag
 %patch2 -p1 -b .permissions
+%patch3 -p1 -b .mtimes
 
 autoreconf -ivf
 
@@ -127,6 +131,11 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %{_datadir}/vala
 
 %changelog
+* Fri Sep 14 2018 Marek Kasik <mkasik@redhat.com> - 0.26.0-3
+- Check mtimes of files in /etc/dconf/db/*.d/ directories
+- when running "dconf update"
+- Resolves: #1626372
+
 * Mon Mar  6 2017 Marek Kasik <mkasik@redhat.com> - 0.26.0-2
 - Restore permissions on updated database
 - Resolves: #1281253
